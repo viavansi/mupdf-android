@@ -1,0 +1,39 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.artifex.mupdfdemo"
+    android:installLocation="auto">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <supports-screens
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="true"
+        android:anyDensity="true" />
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="16"/>
+
+    <application
+        android:label="@string/app_name"
+        android:hardwareAccelerated="true">
+        <activity
+            android:name="com.artifex.mupdfdemo.ChoosePDFActivity"
+            android:theme="@android:style/Theme.Light"
+            android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name="com.artifex.mupdfdemo.MuPDFActivity"
+            android:theme="@style/AppBaseTheme"
+            android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name="com.artifex.mupdfdemo.OutlineActivity"
+            android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen"
+            android:label="@string/outline_title">
+        </activity>
+        <activity
+            android:name="com.artifex.mupdfdemo.PrintDialogActivity"
+            android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen"
+            android:label="@string/print">
+        </activity>
+    </application>
+
+</manifest>
