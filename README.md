@@ -1,7 +1,7 @@
 # MuPDF for Android 
 
 ## Introduction
-This project is intended to offer an easy integration of MuPDF library on Android, avoiding the building process and adapted to the last version of Android Studio and Gradle as of February 2015.
+This project is intended to offer an easy integration of MuPDF library (http://www.mupdf.com) on Android, avoiding the building process and adapted to the last version of Android Studio and Gradle as of February 2015.
 
 We also added some features:
 
