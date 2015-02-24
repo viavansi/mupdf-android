@@ -12,12 +12,12 @@ public class CancellableAsyncTask<Params, Result>
 
 	public void onPreExecute()
 	{
-        String a = "";
+        
 	}
 
 	public void onPostExecute(Result result)
 	{
-        String a = "";
+
 	}
 
 	public CancellableAsyncTask(final CancellableTaskDefinition<Params, Result> task)
