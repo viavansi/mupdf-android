@@ -1,6 +1,5 @@
 repositories {
     mavenCentral()
-//    maven { url 'https://mint.splunk.com/gradle/' }
     maven { url 'http://repo1.maven.org/maven2' }
 }
 
@@ -22,8 +21,8 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
     }
     buildTypes {
         release {
@@ -33,21 +32,7 @@ android {
     }
 }
 
-//// This code below creates a .jar with all the native libraries .so
-//task nativeLibsToJar(type: Zip, description: 'create a jar archive of the native libs') {
-//    destinationDir file("$buildDir/native-libs")
-//    baseName 'native-libs'
-//    extension 'jar'
-//    from fileTree(dir: 'libs', include: '**/*.so')
-//    into 'lib/'
-//}
-//
-//tasks.withType(JavaCompile) {
-//    compileTask -> compileTask.dependsOn(nativeLibsToJar)
-//}
-
 dependencies {
-//    compile fileTree(dir: "$buildDir/native-libs", include: 'native-libs.jar')
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
 }

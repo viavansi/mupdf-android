@@ -10,3 +10,7 @@ We also added some features:
 * You can add an interface listener to the page of the pdf, so you can listen when the user taps, double taps or long press any coordinate of the pdf.
 
 This version is still on development.
+
+## Installation guide
+
+1. Make sure you have installed the newest NDK from https://developer.android.com/tools/sdk/ndk/index.html#Installing (version 9+ required)
