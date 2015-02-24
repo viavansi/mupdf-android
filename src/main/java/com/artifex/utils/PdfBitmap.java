@@ -1,4 +1,4 @@
-package com.viafirma.utils;
+package com.artifex.utils;
 
 import android.graphics.Bitmap;
 import android.os.Parcel;

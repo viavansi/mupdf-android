@@ -1,7 +1,6 @@
 package com.artifex.mupdfdemo;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.util.SparseArray;
@@ -9,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.viafirma.utils.PdfBitmap;
+import com.artifex.utils.PdfBitmap;
 
 import java.util.ArrayList;
 import java.util.List;

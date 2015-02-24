@@ -1,4 +1,4 @@
-package com.viafirma.utils;
+package com.artifex.utils;
 
 /**
  * Created by @elage on 6/2/15.

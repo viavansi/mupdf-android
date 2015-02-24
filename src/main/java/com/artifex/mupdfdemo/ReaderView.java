@@ -18,8 +18,8 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Scroller;
 
-import com.viafirma.utils.DigitalizedEventCallback;
-import com.viafirma.utils.PdfBitmap;
+import com.artifex.utils.DigitalizedEventCallback;
+import com.artifex.utils.PdfBitmap;
 
 public class ReaderView
 		extends AdapterView<Adapter>
@@ -520,7 +520,7 @@ public class ReaderView
 	}
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {//TODO
+    public boolean onTouchEvent(MotionEvent event) {
 
         boolean movementEnd = false;
 

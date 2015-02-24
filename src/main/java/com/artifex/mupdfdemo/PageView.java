@@ -2,7 +2,6 @@ package com.artifex.mupdfdemo;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -17,15 +16,14 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import com.viafirma.utils.DigitalizedEventCallback;
-import com.viafirma.utils.PdfBitmap;
+import com.artifex.utils.DigitalizedEventCallback;
+import com.artifex.utils.PdfBitmap;
 
 // Make our ImageViews opaque to optimize redraw
 class OpaqueImageView extends ImageView {
@@ -303,48 +301,7 @@ public abstract class PageView extends ViewGroup {
 
 		mGetLinkInfo.execute();
 
-		// Render the page in the background
-		mDrawEntire = new CancellableAsyncTask<Void, Void>(getDrawPageTask(mEntireBm, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y)) {
-
-			@Override
-			public void onPreExecute() {
-				setBackgroundColor(BACKGROUND_COLOR);
-				mEntire.setImageBitmap(null);
-				mEntire.invalidate();
-
-				if (mBusyIndicator == null) {
-					mBusyIndicator = new ProgressBar(mContext);
-					mBusyIndicator.setIndeterminate(true);
-					mBusyIndicator.setBackgroundResource(R.drawable.busy);
-					addView(mBusyIndicator);
-					mBusyIndicator.setVisibility(INVISIBLE);
-					mHandler.postDelayed(new Runnable() {
-						public void run() {
-							if (mBusyIndicator != null)
-								mBusyIndicator.setVisibility(VISIBLE);
-						}
-					}, PROGRESS_DIALOG_DELAY);
-				}
-			}
-
-			@Override
-			public void onPostExecute(Void result) {
-				removeView(mBusyIndicator);
-				mBusyIndicator = null;
-				mEntire.setImageBitmap(mEntireBm);
-
-                if (mEntireBm != null && picturePdfBitmap != null) {
-                    Canvas entireCanvas = new Canvas(mEntireBm);
-                    drawBitmaps(entireCanvas, null, null);
-                }
-                
-				mEntire.invalidate();
-				setBackgroundColor(Color.TRANSPARENT);
-
-			}
-		};
-
-		mDrawEntire.execute();
+		updateEntireCanvas(false);
 
 		if (mSearchView == null) {
 			mSearchView = new View(mContext) {
@@ -445,6 +402,58 @@ public abstract class PageView extends ViewGroup {
 		}
 		requestLayout();
 	}
+    
+    private void updateEntireCanvas(final boolean updateZoomed) {
+        // Render the page in the background
+        mDrawEntire = new CancellableAsyncTask<Void, Void>(getDrawPageTask(mEntireBm, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y)) {
+
+            @Override
+            public void onPreExecute() {
+                setBackgroundColor(BACKGROUND_COLOR);
+                mEntire.setImageBitmap(null);
+                mEntire.invalidate();
+
+                if (mBusyIndicator == null) {
+                    mBusyIndicator = new ProgressBar(mContext);
+                    mBusyIndicator.setIndeterminate(true);
+                    mBusyIndicator.setBackgroundResource(R.drawable.busy);
+                    addView(mBusyIndicator);
+                    mBusyIndicator.setVisibility(INVISIBLE);
+                    mHandler.postDelayed(new Runnable() {
+                        public void run() {
+                            if (mBusyIndicator != null)
+                                mBusyIndicator.setVisibility(VISIBLE);
+                        }
+                    }, PROGRESS_DIALOG_DELAY);
+                }
+            }
+
+            @Override
+            public void onPostExecute(Void result) {
+                removeView(mBusyIndicator);
+                mBusyIndicator = null;
+                mEntire.setImageBitmap(mEntireBm);
+
+                // Draws the signatures on EntireCanvas after changing pages (post loading).
+                if (mEntireBm != null) {
+                    Canvas entireCanvas = new Canvas(mEntireBm);
+                    drawBitmaps(entireCanvas, null, null);
+                }
+
+                if (updateZoomed && (mPatchBm != null)) {
+                    Canvas zoomedCanvas = new Canvas(mPatchBm);
+                    drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
+                }
+
+                mEntire.invalidate();
+                setBackgroundColor(Color.TRANSPARENT);
+
+            }
+        };
+
+        mDrawEntire.execute();
+        
+    }
 
 	public void setSearchBoxes(RectF searchBoxes[]) {
 		mSearchBoxes = searchBoxes;
@@ -617,11 +626,6 @@ public abstract class PageView extends ViewGroup {
 	public void updateHq(boolean update) {
 		Rect viewArea = new Rect(getLeft(),getTop(),getRight(),getBottom());
 		if (viewArea.width() == mSize.x || viewArea.height() == mSize.y) {
-            // Bitmap without zoom. Full screen canvas.
-            if (mEntireBm != null) {
-                Canvas entireCanvas = new Canvas(mEntireBm);
-                drawBitmaps(entireCanvas, null, null);
-            }
 			// If the viewArea's size matches the unzoomed size, there is no need for an hq patch
 			if (mPatch != null) {
 				mPatch.setImageBitmap(null);
@@ -640,11 +644,12 @@ public abstract class PageView extends ViewGroup {
 
 			boolean area_unchanged = patchArea.equals(mPatchArea) && patchViewSize.equals(mPatchViewSize);
 
-			// If being asked for the same area as last time and not because of an update then nothing to do
-			if (area_unchanged && !update)
-				return;
-
-			boolean completeRedraw = !(area_unchanged && update);
+            // If being asked for the same area as last time and not because of an update then nothing to do
+//            if (area_unchanged && !update)
+//                return;
+//
+//            boolean completeRedraw = !(area_unchanged && update);
+			boolean completeRedraw = !area_unchanged || update;
 
 			// Stop the drawing of previous patch if still going
 			if (mDrawPatch != null) {
@@ -689,16 +694,13 @@ public abstract class PageView extends ViewGroup {
 					mPatchViewSize = patchViewSize;
 					mPatchArea     = patchArea;
 
-                    // Canvas tras zoom.
-                    Canvas entireCanvas = new Canvas(mEntireBm);
-                    drawBitmaps(entireCanvas, null, null);
+                    if (mPatchBm != null) {
+                        Canvas zoomedCanvas = new Canvas(mPatchBm);
+                        drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
+                        mPatch.setImageBitmap(mPatchBm);
+                        mPatch.invalidate();
+                    }
 
-
-                    Canvas zoomedCanvas = new Canvas(mPatchBm);
-                    drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
-
-					mPatch.setImageBitmap(mPatchBm);
-					mPatch.invalidate();
 					//requestLayout();
 					// Calling requestLayout here doesn't lead to a later call to layout. No idea
 					// why, but apparently others have run into the problem.
@@ -709,33 +711,33 @@ public abstract class PageView extends ViewGroup {
 			mDrawPatch.execute();
 		}
 	}
+    
+    public void update() {
+        // Cancel pending render task
+        if (mDrawEntire != null) {
+            mDrawEntire.cancelAndWait();
+            mDrawEntire = null;
+        }
 
-	public void update() {
-		// Cancel pending render task
-		if (mDrawEntire != null) {
-			mDrawEntire.cancelAndWait();
-			mDrawEntire = null;
-		}
+        if (mDrawPatch != null) {
+            mDrawPatch.cancelAndWait();
+            mDrawPatch = null;
+        }
 
-		if (mDrawPatch != null) {
-			mDrawPatch.cancelAndWait();
-			mDrawPatch = null;
-		}
+        mDrawEntire = new CancellableAsyncTask<Void, Void>(getUpdatePageTask(mEntireBm, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y)) {
 
+            public void onPostExecute(Void result) {
+                Canvas entireCanvas = new Canvas(mEntireBm);
+                drawBitmaps(entireCanvas, null, null);
+                mEntire.setImageBitmap(mEntireBm);
+                mEntire.invalidate();
+            }
+        };
 
-		// Render the page in the background
-		mDrawEntire = new CancellableAsyncTask<Void, Void>(getUpdatePageTask(mEntireBm, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y)) {
+        mDrawEntire.execute();
 
-			public void onPostExecute(Void result) {
-				mEntire.setImageBitmap(mEntireBm);
-				mEntire.invalidate();
-			}
-		};
-
-		mDrawEntire.execute();
-
-		updateHq(true);
-	}
+        updateHq(true);
+    }
 
 	public void removeHq() {
 			// Stop the drawing of the patch if still going
@@ -768,9 +770,30 @@ public abstract class PageView extends ViewGroup {
                 mAdapter.setNumSignature(mAdapter.getNumSignature()+1);
             }
             mAdapter.getPdfBitmapList().add(pdfBitmap);
-            update();
+            
+            redrawEntireBitmaps(); // No repinta el zoomed si ya estoy zoomed.
+            updateHq(true);
         }
     }
+
+    private void redrawEntireBitmaps() {
+        if (mEntireBm != null) {
+            Canvas entireCanvas = new Canvas(mEntireBm);
+            drawBitmaps(entireCanvas, null, null);
+            mEntire.setImageBitmap(mEntireBm);
+            mEntire.invalidate();
+        }
+    }
+
+    private void redrawZoomedBitmaps() {
+        if (mPatchBm != null) {
+            Canvas zoomedCanvas = new Canvas(mPatchBm);
+            drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
+            mPatch.setImageBitmap(mPatchBm);
+            mPatch.invalidate();
+        }
+    }
+
 
     public boolean removeBitmapOnPosition(Point point) {
         boolean removed = false;
@@ -787,9 +810,7 @@ public abstract class PageView extends ViewGroup {
         }
         //Forzamos pintado de pantalla
         invalidate();
-        if (removed) {
-            update();
-        }
+
         return removed;
     }
 
@@ -903,7 +924,13 @@ public abstract class PageView extends ViewGroup {
                     int indexOf = mAdapter.getPdfBitmapList().indexOf(toRemove);
                     if (indexOf >= 0) {
                         mAdapter.getPdfBitmapList().remove(indexOf);
-                        update();
+                        
+                        // We need to remove the previous entireBm (with the bitmaps added), and create a new one empty (the bitmaps will be added on update)
+                        mEntireBm.recycle();
+                        mEntireBm = Bitmap.createBitmap(mParentSize.x, mParentSize.y, Bitmap.Config.ARGB_8888);
+                        updateEntireCanvas(true);
+                        updateHq(true);
+
                         // Bitmap removed
                         return 0;
                     }

@@ -2,10 +2,9 @@ package com.artifex.mupdfdemo;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.concurrent.Executor;
 
-import com.viafirma.utils.DigitalizedEventCallback;
-import com.viafirma.utils.PdfBitmap;
+import com.artifex.utils.DigitalizedEventCallback;
+import com.artifex.utils.PdfBitmap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -615,7 +614,9 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 
 		// Reenstate last state if it was recorded
 		SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-		mDocView.setDisplayedViewIndex(prefs.getInt("page"+mFileName, 0));
+        int lastPage = prefs.getInt("page"+mFileName, 0);
+//        mDocView.setDisplayedViewIndex(lastPage);
+		mDocView.setDisplayedViewIndex(0);
 
 		if (savedInstanceState == null || !savedInstanceState.getBoolean("ButtonsHidden", false))
 			showButtons();

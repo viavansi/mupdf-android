@@ -18,6 +18,8 @@ public class MuPDFReaderView extends ReaderView {
 	private Mode mMode = Mode.Viewing;
 	private boolean tapDisabled = false;
 	private int tapPageMargin;
+    
+    private final boolean TAP_PAGING_ENABLED = false;
 
 	protected void onTapMainDocArea() {}
 	protected void onDocMotion() {}
@@ -93,13 +95,13 @@ public class MuPDFReaderView extends ReaderView {
 							// Clicked on a remote (GoToR) link
 						}
 					});
-				} else if (e.getX() < tapPageMargin) {
+				} else if (TAP_PAGING_ENABLED && e.getX() < tapPageMargin) {
 					super.smartMoveBackwards();
-				} else if (e.getX() > super.getWidth() - tapPageMargin) {
+				} else if (TAP_PAGING_ENABLED && e.getX() > super.getWidth() - tapPageMargin) {
 					super.smartMoveForwards();
-				} else if (e.getY() < tapPageMargin) {
+				} else if (TAP_PAGING_ENABLED && e.getY() < tapPageMargin) {
 					super.smartMoveBackwards();
-				} else if (e.getY() > super.getHeight() - tapPageMargin) {
+				} else if (TAP_PAGING_ENABLED && e.getY() > super.getHeight() - tapPageMargin) {
 					super.smartMoveForwards();
 				} else {
 					onTapMainDocArea();
