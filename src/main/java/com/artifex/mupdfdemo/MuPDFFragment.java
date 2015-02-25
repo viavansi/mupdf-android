@@ -1209,7 +1209,8 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Handler handler = new Handler();
-        handler.postDelayed(runnable, 100);
+        // Excalibur line: if you can replace it, please do it.
+        handler.postDelayed(runnable, 200);
     }
     private Runnable runnable = new Runnable() {
         @Override
