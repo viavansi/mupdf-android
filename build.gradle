@@ -13,6 +13,10 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+def muPdfversionCode = 3
+def muPdfversionName = '1.2'
 
 android {
     compileSdkVersion 21
@@ -21,8 +25,8 @@ android {
     defaultConfig {
         minSdkVersion 10
         targetSdkVersion 21
-        versionCode 2
-        versionName "1.1"
+        versionCode muPdfversionCode
+        versionName muPdfversionName
     }
     buildTypes {
         release {
@@ -32,7 +36,26 @@ android {
     }
 }
 
+configurations {
+    deployerJars
+}
+
 dependencies {
+    deployerJars 'org.apache.maven.wagon:wagon-http:2.2'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
+}
+
+// For Maven Repository submitting : Execute task: UploadArchives. Ex: > gradle uploadArchives
+// Define repoUsername, repoPassword and repoUrl on "gradle.properties" file in order to use this task.
+uploadArchives {
+    repositories.mavenDeployer {
+        configuration = configurations.deployerJars
+        repository(url: repoUrl) {
+            authentication(userName: repoUsername, password: repoPassword)
+        }
+        pom.version = muPdfversionName
+        pom.artifactId = "mupdf-android"
+        pom.groupId = "com.viafirma"
+    }
 }
