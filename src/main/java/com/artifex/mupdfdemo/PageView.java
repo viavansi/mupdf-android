@@ -833,6 +833,26 @@ public abstract class PageView extends ViewGroup {
             eventCallback.longPressOnPdfPosition(mPageNumber, coords[0], coords[1], coords[2], coords[3]);
         }
     }
+    
+    public void onSingleTap(MotionEvent e, float mScale) {
+        if (eventCallback != null) {
+            float x = e.getX();
+            float y = e.getY();
+
+            //Comprobamos si ha picado dentro o fuera del espacio del pdf
+            if (x < getLeft() || x > getRight()) {
+                eventCallback.error(DigitalizedEventCallback.ERROR_OUTSIDE_HORIZONTAL);
+            }
+
+            if (y < getTop() || y > getBottom()) {
+                eventCallback.error(DigitalizedEventCallback.ERROR_OUTSIDE_VERTICAL);
+            }
+
+            float[] coords = translateCoords(mScale, x, y);
+
+            eventCallback.singleTapOnPdfPosition(mPageNumber, coords[0], coords[1], coords[2], coords[3]);
+        }
+    }
 
     private float[] translateCoords(float mScale, float x, float y) {
         float screenX, screenY, percentX, percentY;

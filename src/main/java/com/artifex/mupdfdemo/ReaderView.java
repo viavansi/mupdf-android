@@ -969,6 +969,9 @@ public class ReaderView
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
+        if (currentPage != null) {
+            currentPage.onSingleTap(e, mScale);
+        }
         return false;
     }
 

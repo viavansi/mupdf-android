@@ -10,5 +10,6 @@ public interface DigitalizedEventCallback {
 
     public void longPressOnPdfPosition(int page, float viewX, float viewY, float pdfX, float pdfY);
     public void doubleTapOnPdfPosition(int page, float viewX, float viewY, float pdfX, float pdfY);
+    public void singleTapOnPdfPosition(int page, float viewX, float viewY, float pdfX, float pdfY);
     public void error(String message);
 }

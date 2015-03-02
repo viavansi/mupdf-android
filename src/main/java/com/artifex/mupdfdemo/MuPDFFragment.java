@@ -640,7 +640,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 
         // Performs tap event to refresh view.
         Handler handler = new Handler();
-        handler.postDelayed(runnable, 100);
+        handler.postDelayed(runnable, msRedraw);
         
         return layout;
 	}
@@ -1210,7 +1210,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         super.onConfigurationChanged(newConfig);
         Handler handler = new Handler();
         // Excalibur line: if you can replace it, please do it.
-        handler.postDelayed(runnable, 200);
+        handler.postDelayed(runnable, msRedraw);
     }
     private Runnable runnable = new Runnable() {
         @Override
@@ -1218,6 +1218,8 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
             redrawTouch();
         }
     };
+    
+    private final int msRedraw = 500;
 
     private void redrawTouch(){
         if (mDocView != null) {
