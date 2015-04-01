@@ -985,5 +985,8 @@ public class ReaderView
 
     public void setEventCallback(DigitalizedEventCallback eventCallback) {
         this.eventCallback = eventCallback;
+        if (currentPage != null) {
+            currentPage.setEventCallback(eventCallback);
+        }
     }
 }

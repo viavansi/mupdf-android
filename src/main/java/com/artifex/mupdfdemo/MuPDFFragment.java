@@ -1203,6 +1203,9 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 
     public void setEventCallback(DigitalizedEventCallback eventCallback) {
         this.eventCallback = eventCallback;
+        if (mDocView != null) {
+            mDocView.setEventCallback(eventCallback);
+        }
     }
 
     @Override
