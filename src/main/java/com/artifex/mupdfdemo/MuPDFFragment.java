@@ -25,6 +25,7 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -1163,6 +1164,8 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
     public void addBitmap(PdfBitmap pdfBitmap) {
         if (mDocView != null) {
             mDocView.addBitmap(pdfBitmap);
+        } else {
+            Log.e(TAG, "Couldn't add Bitmap. DocView is NULL.");
         }
     }
 
@@ -1171,6 +1174,8 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         if (mDocView != null) {
             Point point = new Point((int)x, (int)y);
             removed = mDocView.removeBitmapOnPosition(point);
+        } else {
+            Log.e(TAG, "Couldn't remove Bitmap. DocView is NULL.");
         }
         return removed;
     };

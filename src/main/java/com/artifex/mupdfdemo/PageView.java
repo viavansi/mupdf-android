@@ -105,7 +105,7 @@ public abstract class PageView extends ViewGroup {
 
 	protected final Context   mContext;
 	protected     int       mPageNumber;
-	private       Point     mParentSize;
+	private       Point     mParentSize; // Size of the view containing the pdf viewer. It could be the same as the screen if this view is full screen.
 	protected     Point     mSize;   // Size of page at minimum zoom
 	protected     float     mSourceScale;
 
@@ -861,17 +861,25 @@ public abstract class PageView extends ViewGroup {
         float factorRotationX = ((float) mSize.x / (float) getWidth()) * mScale;
         float factorRotationY = ((float) mSize.y / (float) getHeight()) * mScale;
 
-        //Posicion en pantalla
+        //Posicion en la pantalla respecto a las coordenadas del pdf (el 0.0 es la esquina arriba izquierda del pdf). Usado para poder dibujar las firmas encima del PDF. En esta representación, el PDF tendría de alto valores similares al alto de la pantalla en la que se muestra.
         screenX = ((x - getLeft()) / mScale) * factorRotationX;
         screenY = ((y - getTop()) / mScale) * factorRotationY;
 
-        //Calculamos posicion en el pdf
+        // Calculamos posicion en el pdf. No se usa en la visualización, pero es necesario para conocer la posición. En esta representación, el alto del pdf será de unos 900 píxeles, y no variará se muestre donde se muestre.
         percentX = (x - getLeft()) / getWidth();
         percentY = (y - getTop()) / getHeight(); //Se coge la posicion en porcentaje
         float pdfX = percentX*pdfSize.x; //Se calcula X el punto en el pdf
         float pdfY = (1-percentY)*pdfSize.y;//Se calcula Y
+        
+        // Proportions: screenX / mSize.x == pdfX / pdfSize.x !!!
 
         return new float[]{screenX, screenY, pdfX, pdfY};
+    }
+    
+    private float[] pdfCoordsToScreen(float pdfX, float pdfY) {
+        float screenX = (pdfX * mSize.x) / pdfSize.x;
+        float screenY = ((pdfSize.y - pdfY) * mSize.y) / pdfSize.y;
+        return new float[]{screenX, screenY};
     }
 
     public boolean onDoubleTap(MotionEvent e, float mScale) {
@@ -916,7 +924,6 @@ public abstract class PageView extends ViewGroup {
 
             if (signBitmap != null && signBitmapSize != null && !removed) {
                 PdfBitmap newPdfBitmap = new PdfBitmap(signBitmap, SIGN_WIDTH, SIGN_HEIGHT, (int) screenX, (int) screenY, mPageNumber, true);
-                newPdfBitmap.savePdfXY(pdfX, pdfY);
                 mAdapter.getPdfBitmapList().add(newPdfBitmap);
                 mAdapter.setNumSignature(mAdapter.getNumSignature()+1);
             }
@@ -937,14 +944,19 @@ public abstract class PageView extends ViewGroup {
                 float[] scaledSize = scaledSize(pdfBitmap.getWidth(), pdfBitmap.getHeight());
                 int originalW = (int) scaledSize[0];
                 int originalH = (int) scaledSize[1];
-                Rect r = new Rect(pdfBitmap.getX() - (originalW / 2), pdfBitmap.getY() + (originalH / 2), pdfBitmap.getX() + (originalW / 2), pdfBitmap.getY() - (originalH / 2));
+                
+                float[] screenCoords = pdfCoordsToScreen(pdfBitmap.getPdfX(), pdfBitmap.getPdfY());
+                int screenX = (int)screenCoords[0];
+                int screenY = (int)screenCoords[1];
+                
+                Rect r = new Rect(screenX - (originalW / 2), screenY + (originalH / 2), screenX + (originalW / 2), screenY - (originalH / 2));
                 if (screenPoint.x > r.left && screenPoint.x < r.right && screenPoint.y < r.top && screenPoint.y > r.bottom) {
                     toRemove = pdfBitmap;
 
                     int indexOf = mAdapter.getPdfBitmapList().indexOf(toRemove);
                     if (indexOf >= 0) {
                         mAdapter.getPdfBitmapList().remove(indexOf);
-                        
+
                         // We need to remove the previous entireBm (with the bitmaps added), and create a new one empty (the bitmaps will be added on update)
                         mEntireBm.recycle();
                         mEntireBm = Bitmap.createBitmap(mParentSize.x, mParentSize.y, Bitmap.Config.ARGB_8888);
@@ -1005,8 +1017,10 @@ public abstract class PageView extends ViewGroup {
 
             if (pdfBitmap.getPageNumber() == getPageNum()) {
 
-                float newGlobalPosX = (pdfBitmap.getX() * zoomRatio);
-                float newGlobalPosY = (pdfBitmap.getY() * zoomRatio);
+                float[] screenCoords = pdfCoordsToScreen(pdfBitmap.getPdfX(), pdfBitmap.getPdfY());
+
+                float newGlobalPosX = (screenCoords[0] * zoomRatio);
+                float newGlobalPosY = (screenCoords[1] * zoomRatio);
                 float newZoomPosX = patchArea != null ? newGlobalPosX - patchArea.left : newGlobalPosX;
                 float newZoomPosY = patchArea != null ? newGlobalPosY - patchArea.top : newGlobalPosY;
 

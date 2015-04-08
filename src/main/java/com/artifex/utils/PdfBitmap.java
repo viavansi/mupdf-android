@@ -4,17 +4,15 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class PdfBitmap implements Parcelable {
+import java.io.Serializable;
 
-	private static final long serialVersionUID = 1L;
+public class PdfBitmap implements Parcelable, Serializable {
 
-	private static final int NO_IMAGE = -1;
+	private static final long serialVersionUID = 7671592337486809467L;
 
 	private Bitmap image;
 	private int height;
 	private int width;
-	private int x;
-	private int y;
 	private int pageNumber;
     private int pdfX;
     private int pdfY;
@@ -25,16 +23,16 @@ public class PdfBitmap implements Parcelable {
      * @param image The bitmap in charge of storing the stamp or annotation
      * @param height The height defined for the drawing
      * @param width The width defined for the drawing
-     * @param x The X coordinate position defined for the drawing
-     * @param y The Y coordinate position defined for the drawing
+     * @param pdfX The X coordinate position defined for the drawing
+     * @param pdfY The Y coordinate position defined for the drawing
      * @param page The page of the PDF where the bitmap is added
      */
-	public PdfBitmap(Bitmap image, int width, int height, int x, int y, int page, boolean isSignature) {
+	public PdfBitmap(Bitmap image, int width, int height, int pdfX, int pdfY, int page, boolean isSignature) {
 		this.image = image;
 		this.height = height;
 		this.width = width;
-		this.x = x;
-		this.y = y;
+        this.pdfX = pdfX;
+        this.pdfY = pdfY;
 		this.pageNumber = page;// first page is 0
         this.isSignature = isSignature;
 	}
@@ -45,11 +43,9 @@ public class PdfBitmap implements Parcelable {
         image = in.readParcelable(Bitmap.class.getClassLoader());
         height = in.readInt();
         width = in.readInt();
-        x = in.readInt();
-        y = in.readInt();
-        pageNumber = in.readInt();
         pdfX = in.readInt();
         pdfY = in.readInt();
+        pageNumber = in.readInt();
         isSignature = in.readByte() != 0;
 	}
 	
@@ -63,14 +59,6 @@ public class PdfBitmap implements Parcelable {
 	
 	public int getHeight() {
 		return height;
-	}
-	
-	public int getX() {
-		return x;
-	}
-	
-	public int getY() {
-		return y;
 	}
 	
 	public int getPageNumber() {
@@ -87,11 +75,9 @@ public class PdfBitmap implements Parcelable {
         dest.writeParcelable(image, flags);
 		dest.writeInt(height);
 		dest.writeInt(width);
-		dest.writeInt(x);
-		dest.writeInt(y);
-		dest.writeInt(pageNumber);
         dest.writeInt(pdfX);
         dest.writeInt(pdfY);
+		dest.writeInt(pageNumber);
         dest.writeByte((byte)(isSignature ? 1 : 0));
 	}
 
@@ -103,12 +89,6 @@ public class PdfBitmap implements Parcelable {
 			return new PdfBitmap[size];
 		}
 	};
-
-    public void savePdfXY(float pdfX, float pdfY) {
-        //Se corrige la posicion de la firma para el PDF
-        this.pdfX = (int)(pdfX - (width / 2.0f));
-        this.pdfY = (int)(pdfY - (height / 2.0f));
-    }
 
     public int getPdfX() {
         return pdfX;
