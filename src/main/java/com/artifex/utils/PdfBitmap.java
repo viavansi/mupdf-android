@@ -6,9 +6,7 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 
-public class PdfBitmap implements Parcelable, Serializable {
-
-	private static final long serialVersionUID = 7671592337486809467L;
+public class PdfBitmap implements Parcelable {
 
 	private Bitmap image;
 	private int height;
