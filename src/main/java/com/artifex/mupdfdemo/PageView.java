@@ -2,6 +2,7 @@ package com.artifex.mupdfdemo;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -16,6 +17,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -223,7 +225,7 @@ public abstract class PageView extends ViewGroup {
 	}
 
 	public void releaseBitmaps() {
-        
+		Log.i(TAG, "Recycle on releaseBitmaps");
         if (mEntireBm != null) {
             mEntireBm.recycle();
         }
@@ -435,12 +437,12 @@ public abstract class PageView extends ViewGroup {
                 mEntire.setImageBitmap(mEntireBm);
 
                 // Draws the signatures on EntireCanvas after changing pages (post loading).
-                if (mEntireBm != null) {
+                if (mEntireBm != null && !mEntireBm.isRecycled()) {
                     Canvas entireCanvas = new Canvas(mEntireBm);
                     drawBitmaps(entireCanvas, null, null);
                 }
 
-                if (updateZoomed && (mPatchBm != null)) {
+                if (updateZoomed && (mPatchBm != null) && !mPatchBm.isRecycled()) {
                     Canvas zoomedCanvas = new Canvas(mPatchBm);
                     drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
                 }
@@ -619,7 +621,7 @@ public abstract class PageView extends ViewGroup {
 			int bw = mBusyIndicator.getMeasuredWidth();
 			int bh = mBusyIndicator.getMeasuredHeight();
 
-			mBusyIndicator.layout((w-bw)/2, (h-bh)/2, (w+bw)/2, (h+bh)/2);
+			mBusyIndicator.layout((w - bw) / 2, (h - bh) / 2, (w + bw) / 2, (h + bh) / 2);
 		}
 	}
 
@@ -668,6 +670,7 @@ public abstract class PageView extends ViewGroup {
 			CancellableTaskDefinition<Void, Void> task;
 
             if (mPatchBm != null) {
+				Log.i(TAG, "Recycle mPatchBm on updateHQ");
                 mPatchBm.recycle();
             }
             try {
@@ -676,7 +679,7 @@ public abstract class PageView extends ViewGroup {
                 mPatchBm = Bitmap.createBitmap(mPatchAreaWidth, mPatchAreaHeight, Bitmap.Config.ARGB_8888);
                 cancelDraw();
             } catch (OutOfMemoryError e) {
-                e.printStackTrace();
+                Log.e(TAG, e.getMessage(), e);
             }
 
 			if (completeRedraw)
@@ -694,7 +697,7 @@ public abstract class PageView extends ViewGroup {
 					mPatchViewSize = patchViewSize;
 					mPatchArea     = patchArea;
 
-                    if (mPatchBm != null) {
+                    if (mPatchBm != null && !mPatchBm.isRecycled()) {
                         Canvas zoomedCanvas = new Canvas(mPatchBm);
                         drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
                         mPatch.setImageBitmap(mPatchBm);
@@ -766,7 +769,7 @@ public abstract class PageView extends ViewGroup {
 
     public void addBitmap(PdfBitmap pdfBitmap) {
         if (pdfBitmap != null) {
-            if (pdfBitmap.isSignature()) {
+            if (pdfBitmap.getType() == PdfBitmap.Type.SIGNATURE) {
                 mAdapter.setNumSignature(mAdapter.getNumSignature()+1);
             }
             mAdapter.getPdfBitmapList().add(pdfBitmap);
@@ -775,6 +778,14 @@ public abstract class PageView extends ViewGroup {
             updateHq(true);
         }
     }
+
+	public List<PdfBitmap> getBitmapList() {
+		if (mAdapter != null && mAdapter.getPdfBitmapList() != null) {
+			return mAdapter.getPdfBitmapList();
+		} else {
+			return new ArrayList<>();
+		}
+	}
 
     private void redrawEntireBitmaps() {
         if (mEntireBm != null) {
@@ -923,7 +934,7 @@ public abstract class PageView extends ViewGroup {
             boolean removed = removeBitmapOnPosition(point);
 
             if (signBitmap != null && signBitmapSize != null && !removed) {
-                PdfBitmap newPdfBitmap = new PdfBitmap(signBitmap, SIGN_WIDTH, SIGN_HEIGHT, (int) screenX, (int) screenY, mPageNumber, true);
+                PdfBitmap newPdfBitmap = new PdfBitmap(signBitmap, SIGN_WIDTH, SIGN_HEIGHT, (int) screenX, (int) screenY, mPageNumber, PdfBitmap.Type.SIGNATURE);
                 mAdapter.getPdfBitmapList().add(newPdfBitmap);
                 mAdapter.setNumSignature(mAdapter.getNumSignature()+1);
             }
@@ -956,6 +967,7 @@ public abstract class PageView extends ViewGroup {
                     int indexOf = mAdapter.getPdfBitmapList().indexOf(toRemove);
                     if (indexOf >= 0) {
                         mAdapter.getPdfBitmapList().remove(indexOf);
+						mAdapter.setNumSignature(mAdapter.getNumSignature() - 1);
 
                         // We need to remove the previous entireBm (with the bitmaps added), and create a new one empty (the bitmaps will be added on update)
                         mEntireBm.recycle();

@@ -1,6 +1,10 @@
 package com.artifex.mupdfdemo;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import android.content.Context;
@@ -918,6 +922,19 @@ public class ReaderView
     public void addBitmap(PdfBitmap pdfBitmap) {
         currentPage.addBitmap(pdfBitmap);
     }
+
+	public List<PdfBitmap> getBitmapList() {
+		HashSet<PdfBitmap> result = new HashSet<>();
+		if (mChildViews != null && mChildViews.size() > 0) {
+			for (int i = 0; i < mChildViews.size(); i++) {
+				View v = mChildViews.get(i);
+				if (v != null && v instanceof PageView) {
+					result.addAll(((PageView) v).getBitmapList());
+				}
+			}
+		}
+		return new ArrayList<>(result);
+	}
 
     public boolean removeBitmapOnPosition(Point point) {
         if (currentPage != null) {

@@ -8,13 +8,19 @@ import java.io.Serializable;
 
 public class PdfBitmap implements Parcelable {
 
+	public enum Type {
+		SIGNATURE,				// Signature used to sign the document
+		SIGNATURE_USER_IMAGE, 	// User image of some older versions on Viafirma, where we sent the image to the server for it to process that along with the signature.
+		IMAGE					// All generic images shown
+	};
+
 	private Bitmap image;
 	private int height;
 	private int width;
 	private int pageNumber;
     private int pdfX;
     private int pdfY;
-    private boolean isSignature;
+	private Type type;
 
     /**
      * This class is used to store the information of each stamp and annotation on the PDF.
@@ -25,14 +31,14 @@ public class PdfBitmap implements Parcelable {
      * @param pdfY The Y coordinate position defined for the drawing
      * @param page The page of the PDF where the bitmap is added
      */
-	public PdfBitmap(Bitmap image, int width, int height, int pdfX, int pdfY, int page, boolean isSignature) {
+	public PdfBitmap(Bitmap image, int width, int height, int pdfX, int pdfY, int page, Type type) {
 		this.image = image;
 		this.height = height;
 		this.width = width;
         this.pdfX = pdfX;
         this.pdfY = pdfY;
 		this.pageNumber = page;// first page is 0
-        this.isSignature = isSignature;
+		this.type = type;
 	}
 	
 	public PdfBitmap(Parcel in) {
@@ -44,7 +50,10 @@ public class PdfBitmap implements Parcelable {
         pdfX = in.readInt();
         pdfY = in.readInt();
         pageNumber = in.readInt();
-        isSignature = in.readByte() != 0;
+		String typeString = in.readString();
+		if (typeString != null) {
+			type = Type.valueOf(typeString);
+		}
 	}
 	
 	public Bitmap getBitmapImage() {
@@ -76,7 +85,7 @@ public class PdfBitmap implements Parcelable {
         dest.writeInt(pdfX);
         dest.writeInt(pdfY);
 		dest.writeInt(pageNumber);
-        dest.writeByte((byte)(isSignature ? 1 : 0));
+		dest.writeString(type.name());
 	}
 
 	public static final Creator CREATOR = new Creator() {
@@ -96,11 +105,11 @@ public class PdfBitmap implements Parcelable {
         return pdfY;
     }
 
-    public boolean isSignature() {
-        return isSignature;
-    }
+	public Type getType() {
+		return type;
+	}
 
-    public void setSignature(boolean isSignature) {
-        this.isSignature = isSignature;
-    }
+	public void setType(Type type) {
+		this.type = type;
+	}
 }

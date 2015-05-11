@@ -1,6 +1,7 @@
 package com.artifex.mupdfdemo;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.artifex.utils.DigitalizedEventCallback;
@@ -1168,6 +1169,15 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
             Log.e(TAG, "Couldn't add Bitmap. DocView is NULL.");
         }
     }
+
+	public List<PdfBitmap> getBitmapList() {
+		if (mDocView != null) {
+			return mDocView.getBitmapList();
+		} else {
+			Log.e(TAG, "Couldn't get bitmap list. DocView is NULL.");
+			return new ArrayList<>();
+		}
+	}
 
     public boolean removeBitmapOnPosition(float x, float y) {
         boolean removed = false;
