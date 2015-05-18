@@ -98,6 +98,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 	private AsyncTask<Void,Void,MuPDFAlert> mAlertTask;
 	private AlertDialog mAlertDialog;
 	private FilePicker mFilePicker;
+	private List<PdfBitmap> pdfBitmaps;
 	
 	public void createAlertWaiter() {
 		mAlertsActive = true;
@@ -472,6 +473,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         MuPDFPageAdapter adapter = new MuPDFPageAdapter(context, this, core);
 		mDocView.setAdapter(adapter);
         mDocView.setEventCallback(eventCallback);
+		mDocView.setPdfBitmapList(pdfBitmaps);
 
 		mSearchTask = new SearchTask(context, core) {
 			@Override
@@ -646,24 +648,6 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         
         return layout;
 	}
-
-//	@Override
-//	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//		switch (requestCode) {
-//		case OUTLINE_REQUEST:
-//			if (resultCode >= 0)
-//				mDocView.setDisplayedViewIndex(resultCode);
-//			break;
-//		case PRINT_REQUEST:
-//			if (resultCode == Activity.RESULT_CANCELED)
-//				showInfo(getString(R.string.print_failed));
-//			break;
-//		case FILEPICK_REQUEST:
-//			if (mFilePicker != null && resultCode == Activity.RESULT_OK)
-//				mFilePicker.onPick(data.getData());
-//		}
-//		super.onActivityResult(requestCode, resultCode, data);
-//	}
 
 	public Object onRetainNonConfigurationInstance()
 	{
@@ -1169,6 +1153,10 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
             Log.e(TAG, "Couldn't add Bitmap. DocView is NULL.");
         }
     }
+
+	public void setPdfBitmapList(List<PdfBitmap> pdfBitmaps) {
+		this.pdfBitmaps = pdfBitmaps;
+	}
 
 	public List<PdfBitmap> getBitmapList() {
 		if (mDocView != null) {

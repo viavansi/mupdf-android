@@ -767,13 +767,24 @@ public abstract class PageView extends ViewGroup {
 		return true;
 	}
 
+	public void setPdfBitmapList(List<PdfBitmap> pdfBitmaps) {
+		if (pdfBitmaps != null) {
+			for (PdfBitmap pdfBitmap : pdfBitmaps) {
+				addBitmapToAdapter(pdfBitmap);
+			}
+		}
+	}
+
+	private void addBitmapToAdapter(PdfBitmap pdfBitmap) {
+		if (pdfBitmap.getType() == PdfBitmap.Type.SIGNATURE) { //mAdapter null ???
+			mAdapter.setNumSignature(mAdapter.getNumSignature()+1);
+		}
+		mAdapter.getPdfBitmapList().add(pdfBitmap);
+	}
+
     public void addBitmap(PdfBitmap pdfBitmap) {
         if (pdfBitmap != null) {
-            if (pdfBitmap.getType() == PdfBitmap.Type.SIGNATURE) {
-                mAdapter.setNumSignature(mAdapter.getNumSignature()+1);
-            }
-            mAdapter.getPdfBitmapList().add(pdfBitmap);
-            
+			addBitmapToAdapter(pdfBitmap);
             redrawEntireBitmaps(); // No repinta el zoomed si ya estoy zoomed.
             updateHq(true);
         }
