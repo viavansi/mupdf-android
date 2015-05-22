@@ -42,6 +42,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
+import javax.crypto.Cipher;
+
 public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupport
 {
     private static final String TAG = "MuPDFFragment";
@@ -99,6 +101,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 	private AlertDialog mAlertDialog;
 	private FilePicker mFilePicker;
 	private List<PdfBitmap> pdfBitmaps;
+	private byte[] byteArrayPdf;
 	
 	public void createAlertWaiter() {
 		mAlertsActive = true;
@@ -224,7 +227,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 		mFileName = new String(lastSlashPos == -1
 					? path
 					: path.substring(lastSlashPos+1));
-		System.out.println("Trying to open "+path);
+		System.out.println("Trying to open " + path);
 		try
 		{
 			core = new MuPDFCore(mContext, path);
@@ -291,14 +294,18 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
                     uri = intent.getData();
                     mDoSign = intent.getBooleanExtra(PARAM_MODE_SIGN, true);
                 }
-				if (uri.toString().startsWith("content://")) {
+				if ((uri != null && uri.toString().startsWith("content://")) || byteArrayPdf != null) {
 					String reason = null;
 					try {
-						InputStream is = mContext.getContentResolver().openInputStream(uri);
-						int len = is.available();
-						buffer = new byte[len];
-						is.read(buffer, 0, len);
-						is.close();
+						if (byteArrayPdf != null) {
+							buffer = byteArrayPdf;
+						} else {
+							InputStream is = mContext.getContentResolver().openInputStream(uri);
+							int len = is.available();
+							buffer = new byte[len];
+							is.read(buffer, 0, len);
+							is.close();
+						}
 					}
 					catch (OutOfMemoryError e) {
 						System.out.println("Out of memory during buffer reading");
@@ -721,7 +728,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 		if (mDocView != null) {
 			mDocView.applyToChildren(new ReaderView.ViewMapper() {
 				void applyToView(View view) {
-					((MuPDFView)view).releaseBitmaps();
+					((MuPDFView) view).releaseBitmaps();
 				}
 			});
 		}
@@ -737,7 +744,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 
 	private void setButtonEnabled(ImageButton button, boolean enabled) {
 		button.setEnabled(enabled);
-		button.setColorFilter(enabled ? Color.argb(255, 255, 255, 255):Color.argb(255, 128, 128, 128));
+		button.setColorFilter(enabled ? Color.argb(255, 255, 255, 255) : Color.argb(255, 128, 128, 128));
 	}
 
 	private void setLinkHighlight(boolean highlight) {
@@ -757,7 +764,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 			int index = mDocView.getDisplayedViewIndex();
 			updatePageNumView(index);
 			mPageSlider.setMax((core.countPages()-1)*mPageSliderRes);
-			mPageSlider.setProgress(index*mPageSliderRes);
+			mPageSlider.setProgress(index * mPageSliderRes);
 			if (mTopBarMode == TopBarMode.Search) {
 				mSearchText.requestFocus();
 				showKeyboard();
@@ -811,7 +818,10 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 				public void onAnimationStart(Animation animation) {
 					mPageNumberView.setVisibility(View.INVISIBLE);
 				}
-				public void onAnimationRepeat(Animation animation) {}
+
+				public void onAnimationRepeat(Animation animation) {
+				}
+
 				public void onAnimationEnd(Animation animation) {
 					mPageSlider.setVisibility(View.INVISIBLE);
 				}
@@ -845,7 +855,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 	private void updatePageNumView(int index) {
 		if (core == null)
 			return;
-		mPageNumberView.setText(String.format("%d / %d", index+1, core.countPages()));
+		mPageNumberView.setText(String.format("%d / %d", index + 1, core.countPages()));
 	}
 
 	private void printDoc() {
@@ -1116,7 +1126,6 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
     
     // @viafirma: Custom methods
 
-
     public static MuPDFFragment newInstance (String signBitmapPath, List<PdfBitmap> digitalizedImage, String pathPdf) {
         return newInstance(signBitmapPath, digitalizedImage, pathPdf, true);
     }
@@ -1140,6 +1149,23 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         f.setArguments(args);
         return f;
     }
+
+	public static MuPDFFragment newInstance (byte[] bufferedPdf) {
+		MuPDFFragment f = newInstance(null, null, null, false);
+		f.setByteArrayPdf(bufferedPdf);
+		return f;
+	}
+
+	public static MuPDFFragment newInstance (String pathPdf) {
+		MuPDFFragment f = newInstance(null, null, pathPdf, false);
+		return f;
+	}
+
+	public static MuPDFFragment newInstance (byte[] bufferedPdf, boolean showControls) {
+		MuPDFFragment f = newInstance(null, null, null, showControls);
+		f.setByteArrayPdf(bufferedPdf);
+		return f;
+	}
 
     public static MuPDFFragment newInstance (String pathPdf, boolean showControls) {
         MuPDFFragment f = newInstance(null, null, pathPdf, showControls);
@@ -1177,9 +1203,12 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         }
         return removed;
     };
-    
-    
-    @Override
+
+	public void setByteArrayPdf(byte[] byteArrayPdf) {
+		this.byteArrayPdf = byteArrayPdf;
+	}
+
+	@Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         this.mContext = activity;
