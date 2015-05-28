@@ -75,6 +75,7 @@ public class ReaderView
     private float             mLastTouchY;
 
 	private List<PdfBitmap> pdfBitmaps;
+	private boolean initializedPdfBitmaps;
 
 	static abstract class ViewMapper {
 		abstract void applyToView(View view);
@@ -686,7 +687,10 @@ public class ReaderView
 		cv = getOrCreateChild(mCurrent);
         currentPage = (PageView) cv;
         currentPage.setEventCallback(eventCallback);
-		currentPage.setPdfBitmapList(pdfBitmaps);
+		if (!initializedPdfBitmaps) {
+			currentPage.setPdfBitmapList(pdfBitmaps);
+			initializedPdfBitmaps = true;
+		}
         currentPage.setParentSize(new Point(right-left, bottom-top));
 		// When the view is sub-screen-size in either dimension we
 		// offset it to center within the screen area, and to keep

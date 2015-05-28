@@ -11,7 +11,9 @@ import android.widget.BaseAdapter;
 import com.artifex.utils.PdfBitmap;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MuPDFPageAdapter extends BaseAdapter {
 	private final Context mContext;
@@ -19,7 +21,7 @@ public class MuPDFPageAdapter extends BaseAdapter {
 	private final MuPDFCore mCore;
 	private final SparseArray<PointF> mPageSizes = new SparseArray<PointF>();
     private SparseArray<MuPDFPageView> pages;
-    private List<PdfBitmap> pdfBitmapList; // Each signature for each page.
+    private Set<PdfBitmap> pdfBitmapList; // Each signature for each page.
     private int numSignature;
 
 	public MuPDFPageAdapter(Context c, FilePicker.FilePickerSupport filePickerSupport, MuPDFCore core) {
@@ -27,7 +29,7 @@ public class MuPDFPageAdapter extends BaseAdapter {
 		mFilePickerSupport = filePickerSupport;
 		mCore = core;
         pages = new SparseArray<MuPDFPageView>();
-        pdfBitmapList = new ArrayList<PdfBitmap>();
+        pdfBitmapList = new HashSet<PdfBitmap>();
 	}
 
 	public int getCount() {
@@ -84,11 +86,11 @@ public class MuPDFPageAdapter extends BaseAdapter {
 		return pageView;
 	}
 
-    public List<PdfBitmap> getPdfBitmapList() {
+    public Set<PdfBitmap> getPdfBitmapList() {
         return pdfBitmapList;
     }
 
-    public void setPdfBitmapList(List<PdfBitmap> pdfBitmapList) {
+    public void setPdfBitmapList(Set<PdfBitmap> pdfBitmapList) {
         this.pdfBitmapList = pdfBitmapList;
     }
 

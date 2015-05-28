@@ -16,6 +16,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -225,12 +226,13 @@ public abstract class PageView extends ViewGroup {
 	}
 
 	public void releaseBitmaps() {
-		Log.i(TAG, "Recycle on releaseBitmaps");
         if (mEntireBm != null) {
+			Log.i(TAG, "Recycle mEntire on releaseBitmaps");
             mEntireBm.recycle();
         }
 		mEntireBm = null;
         if (mPatchBm != null) {
+			Log.i(TAG, "Recycle mPathBm on releaseBitmaps");
             mPatchBm.recycle();
         }
 		mPatchBm = null;
@@ -671,7 +673,7 @@ public abstract class PageView extends ViewGroup {
 
             if (mPatchBm != null) {
 				Log.i(TAG, "Recycle mPatchBm on updateHQ");
-                mPatchBm.recycle();
+				mPatchBm.recycle();
             }
             try {
                 int mPatchAreaHeight = patchArea.bottom - patchArea.top;
@@ -792,7 +794,7 @@ public abstract class PageView extends ViewGroup {
 
 	public List<PdfBitmap> getBitmapList() {
 		if (mAdapter != null && mAdapter.getPdfBitmapList() != null) {
-			return mAdapter.getPdfBitmapList();
+			return new ArrayList<>(mAdapter.getPdfBitmapList());
 		} else {
 			return new ArrayList<>();
 		}
@@ -975,12 +977,13 @@ public abstract class PageView extends ViewGroup {
                 if (screenPoint.x > r.left && screenPoint.x < r.right && screenPoint.y < r.top && screenPoint.y > r.bottom) {
                     toRemove = pdfBitmap;
 
-                    int indexOf = mAdapter.getPdfBitmapList().indexOf(toRemove);
-                    if (indexOf >= 0) {
-                        mAdapter.getPdfBitmapList().remove(indexOf);
+                    boolean indexOf = mAdapter.getPdfBitmapList().contains(toRemove);
+                    if (indexOf) {
+                        mAdapter.getPdfBitmapList().remove(toRemove);
 						mAdapter.setNumSignature(mAdapter.getNumSignature() - 1);
 
                         // We need to remove the previous entireBm (with the bitmaps added), and create a new one empty (the bitmaps will be added on update)
+						Log.i(TAG, "Recycle mEntire on removeIfExistSign");
                         mEntireBm.recycle();
                         mEntireBm = Bitmap.createBitmap(mParentSize.x, mParentSize.y, Bitmap.Config.ARGB_8888);
                         updateEntireCanvas(true);
@@ -1070,8 +1073,16 @@ public abstract class PageView extends ViewGroup {
 
                 if (!outside) {
                     Bitmap bitmap = pdfBitmap.getBitmapImage();
-                    canvas.drawBitmap(bitmap, new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight()), signZoomedRect, mBitmapPaint);
-                    canvas.save();
+					try {
+						if (!isBitmapRecycled(bitmap)) {
+							canvas.drawBitmap(bitmap, new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight()), signZoomedRect, mBitmapPaint);
+							canvas.save();
+						} else {
+							Log.i(TAG, "Avoided using recycled bitmap");
+						}
+					} catch (RuntimeException e) {
+						Log.e(TAG, e.getLocalizedMessage(), e);
+					}
                 }
             }
         }
@@ -1089,5 +1100,13 @@ public abstract class PageView extends ViewGroup {
     public void setParentSize(Point parentSize) {
         this.mParentSize = parentSize;
     }
+
+	public boolean isBitmapRecycled(Bitmap bitmap) {
+		if (android.os.Build.VERSION.SDK_INT < 17) {
+			return bitmap.isRecycled();
+		} else {
+			return bitmap.isRecycled() || (!bitmap.isPremultiplied() && bitmap.getConfig() == Bitmap.Config.ARGB_8888 && bitmap.hasAlpha());
+		}
+	}
 
 }
