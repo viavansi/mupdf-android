@@ -731,6 +731,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 					((MuPDFView) view).releaseBitmaps();
 				}
 			});
+			mDocView.setEventCallback(null);
 		}
 		if (core != null)
 			core.onDestroy();
@@ -738,6 +739,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 			mAlertTask.cancel(true);
 			mAlertTask = null;
 		}
+		eventCallback = null;
 		core = null;
 		super.onDestroy();
 	}

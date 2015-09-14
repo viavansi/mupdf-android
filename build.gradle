@@ -16,7 +16,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
 def muPdfversionCode = 11
-def muPdfversionName = '1.2.9'
+def muPdfversionName = '1.2.10'
 
 android {
     compileSdkVersion 21
