@@ -1,12 +1,5 @@
 package com.artifex.mupdfdemo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
-
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -24,6 +17,12 @@ import android.widget.Scroller;
 
 import com.artifex.utils.DigitalizedEventCallback;
 import com.artifex.utils.PdfBitmap;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 public class ReaderView
 		extends AdapterView<Adapter>
@@ -938,7 +937,7 @@ public class ReaderView
 		HashSet<PdfBitmap> result = new HashSet<>();
 		if (mChildViews != null && mChildViews.size() > 0) {
 			for (int i = 0; i < mChildViews.size(); i++) {
-				View v = mChildViews.get(i);
+				View v = mChildViews.get(mChildViews.keyAt(i));
 				if (v != null && v instanceof PageView) {
 					result.addAll(((PageView) v).getBitmapList());
 				}
