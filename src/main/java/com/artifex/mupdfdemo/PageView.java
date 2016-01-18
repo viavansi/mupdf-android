@@ -732,10 +732,12 @@ public abstract class PageView extends ViewGroup {
         mDrawEntire = new CancellableAsyncTask<Void, Void>(getUpdatePageTask(mEntireBm, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y)) {
 
             public void onPostExecute(Void result) {
-                Canvas entireCanvas = new Canvas(mEntireBm);
-                drawBitmaps(entireCanvas, null, null);
-                mEntire.setImageBitmap(mEntireBm);
-                mEntire.invalidate();
+				if (mEntireBm != null && !mEntireBm.isRecycled()) {
+					Canvas entireCanvas = new Canvas(mEntireBm);
+					drawBitmaps(entireCanvas, null, null);
+					mEntire.setImageBitmap(mEntireBm);
+					mEntire.invalidate();
+				}
             }
         };
 
@@ -801,7 +803,7 @@ public abstract class PageView extends ViewGroup {
 	}
 
     private void redrawEntireBitmaps() {
-        if (mEntireBm != null) {
+        if (mEntireBm != null && !mEntireBm.isRecycled()) {
             Canvas entireCanvas = new Canvas(mEntireBm);
             drawBitmaps(entireCanvas, null, null);
             mEntire.setImageBitmap(mEntireBm);
@@ -810,7 +812,7 @@ public abstract class PageView extends ViewGroup {
     }
 
     private void redrawZoomedBitmaps() {
-        if (mPatchBm != null) {
+        if (mPatchBm != null && !mPatchBm.isRecycled()) {
             Canvas zoomedCanvas = new Canvas(mPatchBm);
             drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
             mPatch.setImageBitmap(mPatchBm);
