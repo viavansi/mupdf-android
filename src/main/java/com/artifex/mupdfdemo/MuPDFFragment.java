@@ -728,7 +728,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 		if (mDocView != null) {
 			mDocView.applyToChildren(new ReaderView.ViewMapper() {
 				void applyToView(View view) {
-					((MuPDFView) view).releaseBitmaps();
+					((MuPDFView) view).releaseResources();
 				}
 			});
 			mDocView.setEventCallback(null);
@@ -741,6 +741,12 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 		}
 		eventCallback = null;
 		core = null;
+
+		// Android is not releasing the memory recycled from the bitmaps on certain circumstances, which leads to OutOfMemory errors.
+		// Somehow the gc is not called automatically in those situations...
+		//
+		System.gc();
+
 		super.onDestroy();
 	}
 

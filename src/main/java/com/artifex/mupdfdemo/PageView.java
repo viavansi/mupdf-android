@@ -16,7 +16,6 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -217,7 +216,7 @@ public abstract class PageView extends ViewGroup {
 	public void releaseResources() {
         releaseBitmaps();
 
-        reinit();
+		reinit();
 
 		if (mBusyIndicator != null) {
 			removeView(mBusyIndicator);
@@ -226,7 +225,18 @@ public abstract class PageView extends ViewGroup {
 	}
 
 	public void releaseBitmaps() {
-        if (mEntireBm != null) {
+
+		if (mEntire != null) {
+			mEntire.setImageBitmap(null);
+			mEntire.invalidate();
+		}
+
+		if (mPatch != null) {
+			mPatch.setImageBitmap(null);
+			mPatch.invalidate();
+		}
+
+		if (mEntireBm != null) {
 			Log.i(TAG, "Recycle mEntire on releaseBitmaps");
             mEntireBm.recycle();
         }
