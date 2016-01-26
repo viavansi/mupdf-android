@@ -791,7 +791,7 @@ public abstract class PageView extends ViewGroup {
 
 	private void addBitmapToAdapter(PdfBitmap pdfBitmap) {
 		if (pdfBitmap.getType() == PdfBitmap.Type.SIGNATURE) { //mAdapter null ???
-			mAdapter.setNumSignature(mAdapter.getNumSignature()+1);
+			mAdapter.setNumSignature(mAdapter.getNumSignature() + 1);
 		}
 		mAdapter.getPdfBitmapList().add(pdfBitmap);
 	}
@@ -865,8 +865,9 @@ public abstract class PageView extends ViewGroup {
             }
 
             float[] coords = translateCoords(mScale, x, y);
-
-            eventCallback.longPressOnPdfPosition(mPageNumber, coords[0], coords[1], coords[2], coords[3]);
+			if (coords != null) {
+				eventCallback.longPressOnPdfPosition(mPageNumber, coords[0], coords[1], coords[2], coords[3]);
+			}
         }
     }
     
@@ -885,31 +886,36 @@ public abstract class PageView extends ViewGroup {
             }
 
             float[] coords = translateCoords(mScale, x, y);
-
-            eventCallback.singleTapOnPdfPosition(mPageNumber, coords[0], coords[1], coords[2], coords[3]);
+			if (coords != null) {
+				eventCallback.singleTapOnPdfPosition(mPageNumber, coords[0], coords[1], coords[2], coords[3]);
+			}
         }
     }
 
     private float[] translateCoords(float mScale, float x, float y) {
         float screenX, screenY, percentX, percentY;
 
-        //Factor de corrección por si se gira
-        float factorRotationX = ((float) mSize.x / (float) getWidth()) * mScale;
-        float factorRotationY = ((float) mSize.y / (float) getHeight()) * mScale;
+		if (pdfSize != null && mSize != null) {
+			//Factor de corrección por si se gira
+			float factorRotationX = ((float) mSize.x / (float) getWidth()) * mScale;
+			float factorRotationY = ((float) mSize.y / (float) getHeight()) * mScale;
 
-        //Posicion en la pantalla respecto a las coordenadas del pdf (el 0.0 es la esquina arriba izquierda del pdf). Usado para poder dibujar las firmas encima del PDF. En esta representación, el PDF tendría de alto valores similares al alto de la pantalla en la que se muestra.
-        screenX = ((x - getLeft()) / mScale) * factorRotationX;
-        screenY = ((y - getTop()) / mScale) * factorRotationY;
+			//Posicion en la pantalla respecto a las coordenadas del pdf (el 0.0 es la esquina arriba izquierda del pdf). Usado para poder dibujar las firmas encima del PDF. En esta representación, el PDF tendría de alto valores similares al alto de la pantalla en la que se muestra.
+			screenX = ((x - getLeft()) / mScale) * factorRotationX;
+			screenY = ((y - getTop()) / mScale) * factorRotationY;
 
-        // Calculamos posicion en el pdf. No se usa en la visualización, pero es necesario para conocer la posición. En esta representación, el alto del pdf será de unos 900 píxeles, y no variará se muestre donde se muestre.
-        percentX = (x - getLeft()) / getWidth();
-        percentY = (y - getTop()) / getHeight(); //Se coge la posicion en porcentaje
-        float pdfX = percentX*pdfSize.x; //Se calcula X el punto en el pdf
-        float pdfY = (1-percentY)*pdfSize.y;//Se calcula Y
-        
-        // Proportions: screenX / mSize.x == pdfX / pdfSize.x !!!
+			// Calculamos posicion en el pdf. No se usa en la visualización, pero es necesario para conocer la posición. En esta representación, el alto del pdf será de unos 900 píxeles, y no variará se muestre donde se muestre.
+			percentX = (x - getLeft()) / getWidth();
+			percentY = (y - getTop()) / getHeight(); //Se coge la posicion en porcentaje
 
-        return new float[]{screenX, screenY, pdfX, pdfY};
+			float pdfX = percentX * pdfSize.x; //Se calcula X el punto en el pdf
+			float pdfY = (1 - percentY) * pdfSize.y;//Se calcula Y
+
+			// Proportions: screenX / mSize.x == pdfX / pdfSize.x !!!
+			return new float[]{screenX, screenY, pdfX, pdfY};
+		} else {
+			return null;
+		}
     }
     
     private float[] pdfCoordsToScreen(float pdfX, float pdfY) {
@@ -943,27 +949,29 @@ public abstract class PageView extends ViewGroup {
             }
 
             float[] coords = translateCoords(mScale, x, y);
-            float screenX = coords[0];
-            float screenY = coords[1];
-            float pdfX = coords[2];
-            float pdfY = coords[3];
+			if (coords != null) {
+				float screenX = coords[0];
+				float screenY = coords[1];
+				float pdfX = coords[2];
+				float pdfY = coords[3];
 
-            if (eventCallback != null) {
-                flagPositions = true;
-                eventCallback.doubleTapOnPdfPosition(mPageNumber, screenX, screenY, pdfX, pdfY);
-                return true;
-            }
+				if (eventCallback != null) {
+					flagPositions = true;
+					eventCallback.doubleTapOnPdfPosition(mPageNumber, screenX, screenY, pdfX, pdfY);
+					return true;
+				}
 
-            //Salvamos la posicion donde se ha elegido estampar la firma
-            Point point = new Point((int) screenX, (int) screenY);
-            boolean removed = removeBitmapOnPosition(point);
+				//Salvamos la posicion donde se ha elegido estampar la firma
+				Point point = new Point((int) screenX, (int) screenY);
+				boolean removed = removeBitmapOnPosition(point);
 
-            if (signBitmap != null && signBitmapSize != null && !removed) {
-                PdfBitmap newPdfBitmap = new PdfBitmap(signBitmap, SIGN_WIDTH, SIGN_HEIGHT, (int) screenX, (int) screenY, mPageNumber, PdfBitmap.Type.SIGNATURE);
-                mAdapter.getPdfBitmapList().add(newPdfBitmap);
-                mAdapter.setNumSignature(mAdapter.getNumSignature()+1);
-            }
-            flagPositions = true;
+				if (signBitmap != null && signBitmapSize != null && !removed) {
+					PdfBitmap newPdfBitmap = new PdfBitmap(signBitmap, SIGN_WIDTH, SIGN_HEIGHT, (int) screenX, (int) screenY, mPageNumber, PdfBitmap.Type.SIGNATURE);
+					mAdapter.getPdfBitmapList().add(newPdfBitmap);
+					mAdapter.setNumSignature(mAdapter.getNumSignature() + 1);
+				}
+			}
+			flagPositions = true;
         }
         return true;
     }
