@@ -998,7 +998,7 @@ public abstract class PageView extends ViewGroup {
                     toRemove = pdfBitmap;
 
                     boolean indexOf = mAdapter.getPdfBitmapList().contains(toRemove);
-                    if (indexOf) {
+                    if (indexOf && toRemove.isRemovable()) {
                         mAdapter.getPdfBitmapList().remove(toRemove);
 						mAdapter.setNumSignature(mAdapter.getNumSignature() - 1);
 

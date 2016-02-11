@@ -21,6 +21,7 @@ public class PdfBitmap implements Parcelable {
     private int pdfX;
     private int pdfY;
 	private Type type;
+	private boolean isRemovable;
 
     /**
      * This class is used to store the information of each stamp and annotation on the PDF.
@@ -39,6 +40,7 @@ public class PdfBitmap implements Parcelable {
         this.pdfY = pdfY;
 		this.pageNumber = page;// first page is 0
 		this.type = type;
+		this.isRemovable = true;
 	}
 	
 	public PdfBitmap(Parcel in) {
@@ -54,6 +56,7 @@ public class PdfBitmap implements Parcelable {
 		if (typeString != null) {
 			type = Type.valueOf(typeString);
 		}
+		isRemovable = in.readByte() != 0;
 	}
 	
 	public Bitmap getBitmapImage() {
@@ -86,6 +89,7 @@ public class PdfBitmap implements Parcelable {
         dest.writeInt(pdfY);
 		dest.writeInt(pageNumber);
 		dest.writeString(type.name());
+		dest.writeByte((byte)(isRemovable ? 1 : 0));
 	}
 
 	public static final Creator CREATOR = new Creator() {
@@ -111,5 +115,13 @@ public class PdfBitmap implements Parcelable {
 
 	public void setType(Type type) {
 		this.type = type;
+	}
+
+	public boolean isRemovable() {
+		return isRemovable;
+	}
+
+	public void setIsRemovable(boolean isRemovable) {
+		this.isRemovable = isRemovable;
 	}
 }
