@@ -102,6 +102,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 	private FilePicker mFilePicker;
 	private List<PdfBitmap> pdfBitmaps;
 	private byte[] byteArrayPdf;
+	private int mPageNumber = 0;
 	
 	public void createAlertWaiter() {
 		mAlertsActive = true;
@@ -627,7 +628,12 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 		SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         int lastPage = prefs.getInt("page"+mFileName, 0);
 //        mDocView.setDisplayedViewIndex(lastPage);
-		mDocView.setDisplayedViewIndex(0);
+		if (mPageNumber < core.countPages()) {
+			mDocView.setDisplayedViewIndex(mPageNumber);
+		} else {
+			mDocView.setDisplayedViewIndex(0);
+		}
+
 
 		if (savedInstanceState == null || !savedInstanceState.getBoolean("ButtonsHidden", false))
 			showButtons();
@@ -795,7 +801,10 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 				public void onAnimationStart(Animation animation) {
 					mPageSlider.setVisibility(View.VISIBLE);
 				}
-				public void onAnimationRepeat(Animation animation) {}
+
+				public void onAnimationRepeat(Animation animation) {
+				}
+
 				public void onAnimationEnd(Animation animation) {
 					mPageNumberView.setVisibility(View.VISIBLE);
 				}
@@ -1138,7 +1147,16 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         return newInstance(signBitmapPath, digitalizedImage, pathPdf, true);
     }
 
-    public static MuPDFFragment newInstance (String signBitmapPath, List<PdfBitmap> digitalizedImage, String pathPdf, boolean showControls) {
+	public void setPageNumber(int pageNumber) {
+		this.mPageNumber = pageNumber;
+		if (mDocView != null && core != null) {
+			if (pageNumber < core.countPages()) {
+				mDocView.setDisplayedViewIndex(pageNumber);
+			}
+		}
+	}
+
+	public static MuPDFFragment newInstance (String signBitmapPath, List<PdfBitmap> digitalizedImage, String pathPdf, boolean showControls) {
         MuPDFFragment f = new MuPDFFragment();
         Bundle args = new Bundle();
 

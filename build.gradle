@@ -15,8 +15,8 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-def muPdfversionCode = 12
-def muPdfversionName = '1.2.13'
+def muPdfversionCode = 13
+def muPdfversionName = '1.2.14'
 
 android {
     compileSdkVersion 21
