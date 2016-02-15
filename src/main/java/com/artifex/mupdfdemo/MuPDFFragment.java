@@ -1156,6 +1156,14 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 		}
 	}
 
+	public int getCurrentPage() {
+		int page = 0;
+		if (mDocView != null) {
+			page = mDocView.getDisplayedViewIndex();
+		}
+		return page;
+	}
+
 	public static MuPDFFragment newInstance (String signBitmapPath, List<PdfBitmap> digitalizedImage, String pathPdf, boolean showControls) {
         MuPDFFragment f = new MuPDFFragment();
         Bundle args = new Bundle();
