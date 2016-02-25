@@ -6,6 +6,7 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -19,10 +20,12 @@ import com.artifex.utils.DigitalizedEventCallback;
 import com.artifex.utils.PdfBitmap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 public class ReaderView
 		extends AdapterView<Adapter>
@@ -73,8 +76,7 @@ public class ReaderView
     private float             mLastTouchX;
     private float             mLastTouchY;
 
-	private List<PdfBitmap> pdfBitmaps;
-	private boolean initializedPdfBitmaps;
+	private Collection<PdfBitmap> pdfBitmaps;
 
 	static abstract class ViewMapper {
 		abstract void applyToView(View view);
@@ -685,11 +687,8 @@ public class ReaderView
 		boolean notPresent = (mChildViews.get(mCurrent) == null);
 		cv = getOrCreateChild(mCurrent);
         currentPage = (PageView) cv;
-        currentPage.setEventCallback(eventCallback);
-		if (!initializedPdfBitmaps) {
-			currentPage.setPdfBitmapList(pdfBitmaps);
-			initializedPdfBitmaps = true;
-		}
+		currentPage.setEventCallback(eventCallback);
+
         currentPage.setParentSize(new Point(right-left, bottom-top));
 		// When the view is sub-screen-size in either dimension we
 		// offset it to center within the screen area, and to keep
@@ -874,8 +873,8 @@ public class ReaderView
 		// onSettle and onUnsettle are posted so that the calls
 		// wont be executed until after the system has performed
 		// layout.
-		post (new Runnable() {
-			public void run () {
+		post(new Runnable() {
+			public void run() {
 				onSettle(v);
 			}
 		});
@@ -899,8 +898,8 @@ public class ReaderView
 	}
 
 	private Point subScreenSizeOffset(View v) {
-		return new Point(Math.max((getWidth() - v.getMeasuredWidth())/2, 0),
-				Math.max((getHeight() - v.getMeasuredHeight())/2, 0));
+		return new Point(Math.max((getWidth() - v.getMeasuredWidth()) / 2, 0),
+				Math.max((getHeight() - v.getMeasuredHeight()) / 2, 0));
 	}
 
 	private static int directionOfTravel(float vx, float vy) {
@@ -926,24 +925,27 @@ public class ReaderView
     // Viafirma Code:
 
     public void addBitmap(PdfBitmap pdfBitmap) {
-        currentPage.addBitmap(pdfBitmap);
+		if (mAdapter instanceof MuPDFPageAdapter) {
+			// Add the bitmap to the adapter.
+			((MuPDFPageAdapter)mAdapter).addBitmap(pdfBitmap);
+			// Update the view to see the added bitmap.
+			updateCurrentPage();
+		}
     }
 
-	public void setPdfBitmapList(List<PdfBitmap> pdfBitmaps) {
+	public void setPdfBitmapList(Collection<PdfBitmap> pdfBitmaps) {
 		this.pdfBitmaps = pdfBitmaps;
+		if (mAdapter instanceof MuPDFPageAdapter) {
+			((MuPDFPageAdapter) mAdapter).setPdfBitmapList(pdfBitmaps);
+		}
 	}
 
-	public List<PdfBitmap> getBitmapList() {
-		HashSet<PdfBitmap> result = new HashSet<>();
-		if (mChildViews != null && mChildViews.size() > 0) {
-			for (int i = 0; i < mChildViews.size(); i++) {
-				View v = mChildViews.get(mChildViews.keyAt(i));
-				if (v != null && v instanceof PageView) {
-					result.addAll(((PageView) v).getBitmapList());
-				}
-			}
+	public Collection<PdfBitmap> getBitmapList() {
+		if (mAdapter instanceof MuPDFPageAdapter) {
+			return ((MuPDFPageAdapter)mAdapter).getPdfBitmapList();
+		} else {
+			return new HashSet<>();
 		}
-		return new ArrayList<>(result);
 	}
 
     public boolean removeBitmapOnPosition(Point point) {
@@ -972,6 +974,14 @@ public class ReaderView
 
         processTouchEvent(motionEvent, true);
     }
+
+	public void updateCurrentPage() {
+		if (currentPage != null) {
+			//setDisplayedViewIndex(currentPage.getPage());
+			currentPage.redrawEntireBitmaps(); // No repinta el zoomed si ya estoy zoomed.
+			currentPage.updateHq(true);
+		}
+	}
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {

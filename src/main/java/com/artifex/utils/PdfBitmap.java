@@ -3,8 +3,10 @@ package com.artifex.utils;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 public class PdfBitmap implements Parcelable {
 
@@ -22,6 +24,7 @@ public class PdfBitmap implements Parcelable {
     private int pdfY;
 	private Type type;
 	private boolean isRemovable;
+	private HashMap<String, String> metadata;
 
     /**
      * This class is used to store the information of each stamp and annotation on the PDF.
@@ -41,6 +44,7 @@ public class PdfBitmap implements Parcelable {
 		this.pageNumber = page;// first page is 0
 		this.type = type;
 		this.isRemovable = true;
+		this.metadata = new HashMap<>();
 	}
 	
 	public PdfBitmap(Parcel in) {
@@ -57,6 +61,7 @@ public class PdfBitmap implements Parcelable {
 			type = Type.valueOf(typeString);
 		}
 		isRemovable = in.readByte() != 0;
+		in.readMap(metadata, HashMap.class.getClassLoader());
 	}
 	
 	public Bitmap getBitmapImage() {
@@ -90,6 +95,7 @@ public class PdfBitmap implements Parcelable {
 		dest.writeInt(pageNumber);
 		dest.writeString(type.name());
 		dest.writeByte((byte)(isRemovable ? 1 : 0));
+		dest.writeMap(metadata);
 	}
 
 	public static final Creator CREATOR = new Creator() {
@@ -123,5 +129,36 @@ public class PdfBitmap implements Parcelable {
 
 	public void setIsRemovable(boolean isRemovable) {
 		this.isRemovable = isRemovable;
+	}
+
+	public HashMap<String, String> getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(HashMap<String, String> metadata) {
+		this.metadata = metadata;
+	}
+
+	@Override
+	public String toString() {
+		String result = "page:"+pageNumber+", x:"+pdfX+", y:"+pdfY+", width:"+width+", height:"+height+", type:"+type.name();
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		boolean result = false;
+		try {
+			if (o == this) {
+				result = true;
+			} else if (o instanceof PdfBitmap) {
+				PdfBitmap that = (PdfBitmap) o;
+				boolean sameBitmaps = that.getBitmapImage().sameAs(image);
+				result = (that.getPdfX() == pdfX) && (that.getPdfY() == pdfY) && (that.getHeight() == height) && (that.getWidth() == width) && (that.getPageNumber() == pageNumber) && sameBitmaps;
+			}
+		} catch (Exception e) {
+			Log.e("PdfBitmap", e.getLocalizedMessage(), e);
+		}
+		return result;
 	}
 }

@@ -15,15 +15,15 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-def muPdfversionCode = 15
-def muPdfversionName = '1.2.15'
+def muPdfversionCode = 16
+def muPdfversionName = '1.2.16'
 
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        minSdkVersion 10
+        minSdkVersion 15
         targetSdkVersion 21
         versionCode muPdfversionCode
         versionName muPdfversionName

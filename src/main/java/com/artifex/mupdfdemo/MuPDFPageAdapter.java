@@ -11,6 +11,7 @@ import android.widget.BaseAdapter;
 import com.artifex.utils.PdfBitmap;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +22,7 @@ public class MuPDFPageAdapter extends BaseAdapter {
 	private final MuPDFCore mCore;
 	private final SparseArray<PointF> mPageSizes = new SparseArray<PointF>();
     private SparseArray<MuPDFPageView> pages;
-    private Set<PdfBitmap> pdfBitmapList; // Each signature for each page.
+    private Collection<PdfBitmap> pdfBitmapList; // Each signature for each page.
     private int numSignature;
 
 	public MuPDFPageAdapter(Context c, FilePicker.FilePickerSupport filePickerSupport, MuPDFCore core) {
@@ -86,11 +87,11 @@ public class MuPDFPageAdapter extends BaseAdapter {
 		return pageView;
 	}
 
-    public Set<PdfBitmap> getPdfBitmapList() {
+    public Collection<PdfBitmap> getPdfBitmapList() {
         return pdfBitmapList;
     }
 
-    public void setPdfBitmapList(Set<PdfBitmap> pdfBitmapList) {
+    public void setPdfBitmapList(Collection<PdfBitmap> pdfBitmapList) {
         this.pdfBitmapList = pdfBitmapList;
     }
 
@@ -101,4 +102,20 @@ public class MuPDFPageAdapter extends BaseAdapter {
     public void setNumSignature(int numSignature) {
         this.numSignature = numSignature;
     }
+
+	public void addBitmaps(Set<PdfBitmap> pdfBitmaps) {
+		if (pdfBitmaps != null) {
+			for (PdfBitmap pdfBitmap : pdfBitmaps) {
+				addBitmap(pdfBitmap);
+			}
+		}
+	}
+
+	public void addBitmap(PdfBitmap pdfBitmap) {
+		if (pdfBitmap.getType() == PdfBitmap.Type.SIGNATURE) { //mAdapter null ???
+			numSignature = numSignature + 1;
+		}
+		pdfBitmapList.add(pdfBitmap);
+	}
+
 }

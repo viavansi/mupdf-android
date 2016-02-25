@@ -2,7 +2,10 @@ package com.artifex.mupdfdemo;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.artifex.utils.DigitalizedEventCallback;
 import com.artifex.utils.PdfBitmap;
@@ -100,7 +103,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 	private AsyncTask<Void,Void,MuPDFAlert> mAlertTask;
 	private AlertDialog mAlertDialog;
 	private FilePicker mFilePicker;
-	private List<PdfBitmap> pdfBitmaps;
+	private Collection<PdfBitmap> pdfBitmaps;
 	private byte[] byteArrayPdf;
 	private int mPageNumber = 0;
 	
@@ -1214,16 +1217,19 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         }
     }
 
-	public void setPdfBitmapList(List<PdfBitmap> pdfBitmaps) {
+	public void setPdfBitmapList(Collection<PdfBitmap> pdfBitmaps) {
 		this.pdfBitmaps = pdfBitmaps;
+		if (mDocView != null) {
+			mDocView.setPdfBitmapList(pdfBitmaps);
+		}
 	}
 
-	public List<PdfBitmap> getBitmapList() {
+	public Collection<PdfBitmap> getBitmapList() {
 		if (mDocView != null) {
 			return mDocView.getBitmapList();
 		} else {
 			Log.e(TAG, "Couldn't get bitmap list. DocView is NULL.");
-			return new ArrayList<>();
+			return new HashSet<>();
 		}
 	}
 
@@ -1281,6 +1287,14 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         // Excalibur line: if you can replace it, please do it.
         handler.postDelayed(runnable, msRedraw);
     }
+
+	public void updateCurrentPage() {
+		if (mDocView != null) {
+			mDocView.updateCurrentPage();
+		}
+	}
+
+
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
