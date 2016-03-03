@@ -21,7 +21,7 @@ public class MuPDFPageAdapter extends BaseAdapter {
 	private final FilePicker.FilePickerSupport mFilePickerSupport;
 	private final MuPDFCore mCore;
 	private final SparseArray<PointF> mPageSizes = new SparseArray<PointF>();
-    private SparseArray<MuPDFPageView> pages;
+    private SparseArray<MuPDFPageView> pages = new SparseArray<MuPDFPageView>();
     private Collection<PdfBitmap> pdfBitmapList; // Each signature for each page.
     private int numSignature;
 
@@ -29,8 +29,6 @@ public class MuPDFPageAdapter extends BaseAdapter {
 		mContext = c;
 		mFilePickerSupport = filePickerSupport;
 		mCore = core;
-        pages = new SparseArray<MuPDFPageView>();
-        pdfBitmapList = new HashSet<PdfBitmap>();
 	}
 
 	public int getCount() {
@@ -88,6 +86,9 @@ public class MuPDFPageAdapter extends BaseAdapter {
 	}
 
     public Collection<PdfBitmap> getPdfBitmapList() {
+		if (pdfBitmapList == null) {
+			pdfBitmapList = new HashSet<PdfBitmap>();
+		}
         return pdfBitmapList;
     }
 
@@ -115,7 +116,7 @@ public class MuPDFPageAdapter extends BaseAdapter {
 		if (pdfBitmap.getType() == PdfBitmap.Type.SIGNATURE) { //mAdapter null ???
 			numSignature = numSignature + 1;
 		}
-		pdfBitmapList.add(pdfBitmap);
+		getPdfBitmapList().add(pdfBitmap);
 	}
 
 }
