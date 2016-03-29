@@ -983,6 +983,25 @@ public class ReaderView
 		}
 	}
 
+	public void redrawAll() {
+		redrawPage(currentPage);
+		if (mCurrent-1 > 0) {
+			PageView prevPage = (PageView) mChildViews.get(mCurrent - 1);
+			redrawPage(prevPage);
+		}
+		if (mCurrent+1 < mChildViews.size()) {
+			PageView posPage = (PageView) mChildViews.get(mCurrent + 1);
+			redrawPage(posPage);
+		}
+	}
+
+	private void redrawPage(PageView pageView) {
+		if (pageView != null) {
+			pageView.updateEntireCanvas(false);
+			pageView.updateHq(true);
+		}
+	}
+
     @Override
     public boolean onDoubleTap(MotionEvent e) {
         if (currentPage != null) {

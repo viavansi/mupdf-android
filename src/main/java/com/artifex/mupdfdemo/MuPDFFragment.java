@@ -1294,6 +1294,12 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 		}
 	}
 
+	public void redrawAll() {
+		if (mDocView != null) {
+			mDocView.redrawAll();
+		}
+	}
+
 
     private Runnable runnable = new Runnable() {
         @Override

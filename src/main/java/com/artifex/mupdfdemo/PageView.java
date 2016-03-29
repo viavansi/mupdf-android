@@ -419,7 +419,7 @@ public abstract class PageView extends ViewGroup {
         requestLayout();
     }
 
-    private void updateEntireCanvas(final boolean updateZoomed) {
+    public void updateEntireCanvas(final boolean updateZoomed) {
         // Render the page in the background
         mDrawEntire = new CancellableAsyncTask<Void, Void>(getDrawPageTask(mEntireBm, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y)) {
 
