@@ -10,10 +10,8 @@ import android.widget.BaseAdapter;
 
 import com.artifex.utils.PdfBitmap;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class MuPDFPageAdapter extends BaseAdapter {
@@ -52,6 +50,22 @@ public class MuPDFPageAdapter extends BaseAdapter {
         } else {
             pageView = pages.get(position);
         }
+
+		//Limit the pages cache to improve memory usage
+		if(pages.size()>3){
+			if(position>1) {
+				MuPDFPageView previous = pages.get(position - 2);
+				if(previous!=null){
+					pages.removeAt(pages.indexOfValue(previous));
+					previous=null;
+				}
+				MuPDFPageView post = pages.get(position + 2);
+				if (post != null) {
+					pages.removeAt(pages.indexOfValue(post));
+					post = null;
+				}
+			}
+		}
 
 		PointF pageSize = mPageSizes.get(position);
 		if (pageSize != null) {

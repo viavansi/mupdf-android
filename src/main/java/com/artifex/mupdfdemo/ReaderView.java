@@ -6,7 +6,6 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -19,13 +18,10 @@ import android.widget.Scroller;
 import com.artifex.utils.DigitalizedEventCallback;
 import com.artifex.utils.PdfBitmap;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 public class ReaderView
 		extends AdapterView<Adapter>
@@ -40,7 +36,7 @@ public class ReaderView
 	private static final int  GAP               = 20;
 
 	private static final float MIN_SCALE        = 1.0f;
-	private static final float MAX_SCALE        = 5.0f;
+	private static final float MAX_SCALE        = 3.0f;
 	private static final float REFLOW_SCALE_FACTOR = 0.5f;
 
 	private static final boolean HORIZONTAL_SCROLLING = true;
@@ -52,8 +48,7 @@ public class ReaderView
 				  mChildViews = new SparseArray<View>(3);
 					       // Shadows the children of the adapter view
 					       // but with more sensible indexing
-	private final LinkedList<View>
-				  mViewCache = new LinkedList<View>();
+	private final LinkedList<View> mViewCache = new LinkedList<View>();
 	private boolean           mUserInteracting;  // Whether the user is interacting
 	private boolean           mScaling;    // Whether the user is currently pinch zooming
 	private float             mScale     = 1.0f;
@@ -346,7 +341,9 @@ public class ReaderView
 
 	protected void onUnsettle(View v) {};
 
-	protected void onNotInUse(View v) {};
+	protected void onNotInUse(View v) {
+		((PageView)v).releaseResources();
+	};
 
 	protected void onScaleChild(View v, Float scale) {};
 

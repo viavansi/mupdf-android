@@ -1,9 +1,5 @@
 package com.artifex.mupdfdemo;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -26,6 +22,9 @@ import android.widget.ProgressBar;
 
 import com.artifex.utils.DigitalizedEventCallback;
 import com.artifex.utils.PdfBitmap;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 // Make our ImageViews opaque to optimize redraw
 class OpaqueImageView extends ImageView {
@@ -231,7 +230,6 @@ public abstract class PageView extends ViewGroup {
     }
 
     public void releaseBitmaps() {
-
         if (mEntire != null) {
             mEntire.setImageBitmap(null);
             mEntire.invalidate();
@@ -640,93 +638,103 @@ public abstract class PageView extends ViewGroup {
         }
     }
 
+    private boolean flagHQ = false;
     public void updateHq(boolean update) {
-        Rect viewArea = new Rect(getLeft(), getTop(), getRight(), getBottom());
-        if (viewArea.width() == mSize.x || viewArea.height() == mSize.y) {
-            // If the viewArea's size matches the unzoomed size, there is no need for an hq patch
-            if (mPatch != null) {
-                mPatch.setImageBitmap(null);
-                mPatch.invalidate();
-            }
-        } else {
-            final Point patchViewSize = new Point(viewArea.width(), viewArea.height());
-            final Rect patchArea = new Rect(0, 0, mParentSize.x, mParentSize.y);
+        if(!flagHQ) {
+            flagHQ = true;
+            Rect viewArea = new Rect(getLeft(), getTop(), getRight(), getBottom());
 
-            // Intersect and test that there is an intersection
-            if (!patchArea.intersect(viewArea))
-                return;
+            if (viewArea.width() == mSize.x || viewArea.height() == mSize.y) {
+                // If the viewArea's size matches the unzoomed size, there is no need for an hq patch
+                if (mPatch != null) {
+                    mPatch.setImageBitmap(null);
+                    mPatch.invalidate();
+                }
+            } else {
+                final Point patchViewSize = new Point(viewArea.width(), viewArea.height());
+                final Rect patchArea = new Rect(0, 0, mParentSize.x, mParentSize.y);
 
-            // Offset patch area to be relative to the view top left
-            patchArea.offset(-viewArea.left, -viewArea.top);
+                // Intersect and test that there is an intersection
+                if (!patchArea.intersect(viewArea))
+                    return;
 
-            boolean area_unchanged = patchArea.equals(mPatchArea) && patchViewSize.equals(mPatchViewSize);
+                // Offset patch area to be relative to the view top left
+                patchArea.offset(-viewArea.left, -viewArea.top);
 
-            // If being asked for the same area as last time and not because of an update then nothing to do
+                boolean area_unchanged = patchArea.equals(mPatchArea) && patchViewSize.equals(mPatchViewSize);
+
+                // If being asked for the same area as last time and not because of an update then nothing to do
 //            if (area_unchanged && !update)
 //                return;
 //
 //            boolean completeRedraw = !(area_unchanged && update);
-            boolean completeRedraw = !area_unchanged || update;
+                boolean completeRedraw = !area_unchanged || update;
 
-            // Stop the drawing of previous patch if still going
-            if (mDrawPatch != null) {
-                mDrawPatch.cancelAndWait();
-                mDrawPatch = null;
-            }
-
-            // Create and add the image view if not already done
-            if (mPatch == null) {
-                mPatch = new OpaqueImageView(mContext);
-                mPatch.setScaleType(ImageView.ScaleType.MATRIX);
-                addView(mPatch);
-                mSearchView.bringToFront();
-            }
-
-            CancellableTaskDefinition<Void, Void> task;
-
-            final Bitmap oldPatchBm = mPatchBm;
-            try {
-                int mPatchAreaHeight = patchArea.bottom - patchArea.top;
-                int mPatchAreaWidth = patchArea.right - patchArea.left;
-                mPatchBm = Bitmap.createBitmap(mPatchAreaWidth, mPatchAreaHeight, Bitmap.Config.ARGB_8888);
-                Log.i(TAG, "Recycle oldPatchBm on updateHQ: " + oldPatchBm);
-                cancelDraw();
-            } catch (OutOfMemoryError e) {
-                Log.e(TAG, e.getMessage(), e);
-            }
-
-            if (completeRedraw)
-                task = getDrawPageTask(mPatchBm, patchViewSize.x, patchViewSize.y,
-                        patchArea.left, patchArea.top,
-                        patchArea.width(), patchArea.height());
-            else
-                task = getUpdatePageTask(mPatchBm, patchViewSize.x, patchViewSize.y,
-                        patchArea.left, patchArea.top,
-                        patchArea.width(), patchArea.height());
-
-            mDrawPatch = new CancellableAsyncTask<Void, Void>(task) {
-
-                public void onPostExecute(Void result) {
-                    mPatchViewSize = patchViewSize;
-                    mPatchArea = patchArea;
-
-                    if (mPatchBm != null && !mPatchBm.isRecycled()) {
-                        Canvas zoomedCanvas = new Canvas(mPatchBm);
-                        drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
-                        mPatch.setImageBitmap(mPatchBm);
-                        mPatch.invalidate();
-                    }
-
-                    //requestLayout();
-                    // Calling requestLayout here doesn't lead to a later call to layout. No idea
-                    // why, but apparently others have run into the problem.
-                    mPatch.layout(mPatchArea.left, mPatchArea.top, mPatchArea.right, mPatchArea.bottom);
-
-                    recycleBitmap(oldPatchBm);
+                // Stop the drawing of previous patch if still going
+                if (mDrawPatch != null) {
+                    mDrawPatch.cancelAndWait();
+                    mDrawPatch = null;
                 }
-            };
 
-            mDrawPatch.execute();
+                // Create and add the image view if not already done
+                if (mPatch == null) {
+                    mPatch = new OpaqueImageView(mContext);
+                    mPatch.setScaleType(ImageView.ScaleType.MATRIX);
+                    addView(mPatch);
+                    if (mSearchView != null) {
+                        mSearchView.bringToFront();
+                    }
+                }
+
+                CancellableTaskDefinition<Void, Void> task;
+
+                final Bitmap oldPatchBm = mPatchBm;
+                try {
+                    int mPatchAreaHeight = patchArea.bottom - patchArea.top;
+                    int mPatchAreaWidth = patchArea.right - patchArea.left;
+                    mPatchBm = Bitmap.createBitmap(mPatchAreaWidth, mPatchAreaHeight, Bitmap.Config.ARGB_8888);
+                    Log.i(TAG, "Recycle oldPatchBm on updateHQ: " + oldPatchBm);
+                    cancelDraw();
+                } catch (OutOfMemoryError e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
+
+                if (completeRedraw)
+                    task = getDrawPageTask(mPatchBm, patchViewSize.x, patchViewSize.y,
+                            patchArea.left, patchArea.top,
+                            patchArea.width(), patchArea.height());
+                else
+                    task = getUpdatePageTask(mPatchBm, patchViewSize.x, patchViewSize.y,
+                            patchArea.left, patchArea.top,
+                            patchArea.width(), patchArea.height());
+
+                mDrawPatch = new CancellableAsyncTask<Void, Void>(task) {
+
+                    public void onPostExecute(Void result) {
+                        mPatchViewSize = patchViewSize;
+                        mPatchArea = patchArea;
+
+                        if (mPatchBm != null && !mPatchBm.isRecycled()) {
+                            Canvas zoomedCanvas = new Canvas(mPatchBm);
+                            drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
+                            mPatch.setImageBitmap(mPatchBm);
+                            mPatch.invalidate();
+                        }
+
+                        //requestLayout();
+                        // Calling requestLayout here doesn't lead to a later call to layout. No idea
+                        // why, but apparently others have run into the problem.
+                        mPatch.layout(mPatchArea.left, mPatchArea.top, mPatchArea.right, mPatchArea.bottom);
+
+                        if (mPatchBm != null && !mPatchBm.equals(oldPatchBm)) {
+                            recycleBitmap(oldPatchBm);
+                        }
+                        flagHQ = false;
+                    }
+                };
+
+                mDrawPatch.execute();
+            }
         }
     }
 
@@ -773,6 +781,7 @@ public abstract class PageView extends ViewGroup {
             mPatch.setImageBitmap(null);
             mPatch.invalidate();
         }
+        flagHQ = false;
     }
 
     public int getPage() {
@@ -977,11 +986,17 @@ public abstract class PageView extends ViewGroup {
 
                         // We need to remove the previous entireBm (with the bitmaps added), and create a new one empty (the bitmaps will be added on update)
                         Log.i(TAG, "Recycle mEntire on removeIfExistSign: " + mEntireBm);
-                        recycleBitmap(mEntireBm);
-                        mEntireBm = Bitmap.createBitmap(mParentSize.x, mParentSize.y, Bitmap.Config.ARGB_8888);
-                        updateEntireCanvas(true);
-                        updateHq(true);
-
+                        final Bitmap oldEntireBm = mEntireBm;
+                        try {
+                            mEntireBm = Bitmap.createBitmap(mParentSize.x, mParentSize.y, Bitmap.Config.ARGB_8888);
+                            updateEntireCanvas(true);
+                            updateHq(true);
+                        } catch (OutOfMemoryError e) {
+                            Log.e(TAG, e.getMessage(), e);
+                        }
+                        if(oldEntireBm!=null && !oldEntireBm.equals(mEntireBm)) {
+                            recycleBitmap(oldEntireBm);
+                        }
                         // Bitmap removed
                         return 0;
                     }
@@ -1099,6 +1114,9 @@ public abstract class PageView extends ViewGroup {
         if (bitmap != null) {
             Log.d(TAG, "Recycling bitmap " + bitmap.toString());
             bitmap.recycle();
+            if(!bitmap.isRecycled()){
+                Log.e(TAG, "NOT Recycled bitmap " + bitmap.toString());
+            }
         }
     }
 
