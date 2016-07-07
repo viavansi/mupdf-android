@@ -422,6 +422,12 @@ public abstract class PageView extends ViewGroup {
         mDrawEntire = new CancellableAsyncTask<Void, Void>(getDrawPageTask(mEntireBm, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y)) {
 
             @Override
+            public void cancelAndWait() {
+                super.cancelAndWait();
+                flagHQ = false;
+            }
+
+            @Override
             public void onPreExecute() {
                 setBackgroundColor(BACKGROUND_COLOR);
                 mEntire.setImageBitmap(null);
@@ -458,7 +464,7 @@ public abstract class PageView extends ViewGroup {
                     Canvas zoomedCanvas = new Canvas(mPatchBm);
                     drawBitmaps(zoomedCanvas, mPatchViewSize, mPatchArea);
                 }
-
+                flagHQ = false;
                 mEntire.invalidate();
                 setBackgroundColor(Color.TRANSPARENT);
 
@@ -498,7 +504,8 @@ public abstract class PageView extends ViewGroup {
         else
             mSelectBox = new RectF(docRelX1, docRelY1, docRelX0, docRelY0);
 
-        mSearchView.invalidate();
+        if (mSearchView != null)
+            mSearchView.invalidate();
 
         if (mGetText == null) {
             mGetText = new AsyncTask<Void, Void, TextWord[][]>() {
@@ -510,7 +517,8 @@ public abstract class PageView extends ViewGroup {
                 @Override
                 protected void onPostExecute(TextWord[][] result) {
                     mText = result;
-                    mSearchView.invalidate();
+                    if (mSearchView != null)
+                        mSearchView.invalidate();
                 }
             };
 
@@ -528,7 +536,8 @@ public abstract class PageView extends ViewGroup {
         ArrayList<PointF> arc = new ArrayList<PointF>();
         arc.add(new PointF(docRelX, docRelY));
         mDrawing.add(arc);
-        mSearchView.invalidate();
+        if (mSearchView != null)
+            mSearchView.invalidate();
     }
 
     public void continueDraw(float x, float y) {
@@ -539,13 +548,15 @@ public abstract class PageView extends ViewGroup {
         if (mDrawing != null && mDrawing.size() > 0) {
             ArrayList<PointF> arc = mDrawing.get(mDrawing.size() - 1);
             arc.add(new PointF(docRelX, docRelY));
-            mSearchView.invalidate();
+            if (mSearchView != null)
+                mSearchView.invalidate();
         }
     }
 
     public void cancelDraw() {
         mDrawing = null;
-        mSearchView.invalidate();
+        if (mSearchView != null)
+            mSearchView.invalidate();
     }
 
     protected PointF[][] getDraw() {
@@ -650,13 +661,16 @@ public abstract class PageView extends ViewGroup {
                     mPatch.setImageBitmap(null);
                     mPatch.invalidate();
                 }
+                flagHQ = false;
             } else {
                 final Point patchViewSize = new Point(viewArea.width(), viewArea.height());
                 final Rect patchArea = new Rect(0, 0, mParentSize.x, mParentSize.y);
 
                 // Intersect and test that there is an intersection
-                if (!patchArea.intersect(viewArea))
+                if (!patchArea.intersect(viewArea)) {
+                    flagHQ = false;
                     return;
+                }
 
                 // Offset patch area to be relative to the view top left
                 patchArea.offset(-viewArea.left, -viewArea.top);
@@ -697,6 +711,7 @@ public abstract class PageView extends ViewGroup {
                     cancelDraw();
                 } catch (OutOfMemoryError e) {
                     Log.e(TAG, e.getMessage(), e);
+                    flagHQ = false;
                 }
 
                 if (completeRedraw)
@@ -709,6 +724,12 @@ public abstract class PageView extends ViewGroup {
                             patchArea.width(), patchArea.height());
 
                 mDrawPatch = new CancellableAsyncTask<Void, Void>(task) {
+
+                    @Override
+                    public void cancelAndWait() {
+                        super.cancelAndWait();
+                        flagHQ = false;
+                    }
 
                     public void onPostExecute(Void result) {
                         mPatchViewSize = patchViewSize;
@@ -752,12 +773,19 @@ public abstract class PageView extends ViewGroup {
 
         mDrawEntire = new CancellableAsyncTask<Void, Void>(getUpdatePageTask(mEntireBm, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y)) {
 
+            @Override
+            public void cancelAndWait() {
+                super.cancelAndWait();
+                flagHQ = false;
+            }
+
             public void onPostExecute(Void result) {
                 if (mEntireBm != null && !mEntireBm.isRecycled()) {
                     Canvas entireCanvas = new Canvas(mEntireBm);
                     drawBitmaps(entireCanvas, null, null);
                     mEntire.setImageBitmap(mEntireBm);
                     mEntire.invalidate();
+                    flagHQ=false;
                 }
             }
         };
