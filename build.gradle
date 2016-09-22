@@ -1,14 +1,16 @@
 repositories {
     mavenCentral()
+    jcenter()
     maven { url 'http://repo1.maven.org/maven2' }
 }
 
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'com.android.tools.build:gradle:2.2.0'
     }
 }
 
@@ -22,6 +24,9 @@ android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
 
+    lintOptions {
+        abortOnError false
+    }
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 21
