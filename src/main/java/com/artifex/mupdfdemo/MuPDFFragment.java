@@ -106,7 +106,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 	private Collection<PdfBitmap> pdfBitmaps;
 	private byte[] byteArrayPdf;
 	private int mPageNumber = 0;
-	
+
 	public void createAlertWaiter() {
 		mAlertsActive = true;
 		// All mupdf library calls are performed on asynchronous tasks to avoid stalling
@@ -519,7 +519,11 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
-				updatePageNumView((progress+mPageSliderRes/2)/mPageSliderRes);
+				int page = (progress+mPageSliderRes/2)/mPageSliderRes;
+				updatePageNumView(page);
+				if (eventCallback != null) {
+					eventCallback.pageChanged(page);
+				}
 			}
 		});
 
