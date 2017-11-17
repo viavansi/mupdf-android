@@ -55,6 +55,7 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
     public static final String PARAM_PATH_PDF = "paramPathPdf";
     public static final String PARAM_SHOW_CONTROLS = "paramShowControls";
     public static final String PARAM_MODE_SIGN = "doSign";
+	public static final String PARAM_PASSWORD_PDF = "paramPasswordPdf";
 
     /* State restoration */
     private static final String BUNDLE_FILENAME = "savedFileName";
@@ -363,8 +364,13 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 				SearchTaskResult.set(null);
 			}
 			if (core != null && core.needsPassword()) {
-				requestPassword(savedInstanceState);
-				return null;
+				if (getArguments() != null && getArguments().getString(PARAM_PASSWORD_PDF) != null) {
+					String password = getArguments().getString(PARAM_PASSWORD_PDF);
+					core.authenticatePassword(password);
+				} else {
+					requestPassword(savedInstanceState);
+					return null;
+				}
 			}
 			if (core != null && core.countPages() == 0)
 			{
@@ -1172,6 +1178,11 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
 	}
 
 	public static MuPDFFragment newInstance (String signBitmapPath, List<PdfBitmap> digitalizedImage, String pathPdf, boolean showControls) {
+		MuPDFFragment f = newInstance(signBitmapPath, digitalizedImage, pathPdf, null, showControls);
+		return f;
+	}
+
+	public static MuPDFFragment newInstance (String signBitmapPath, List<PdfBitmap> digitalizedImage, String pathPdf, String passwordPdf, boolean showControls) {
         MuPDFFragment f = new MuPDFFragment();
         Bundle args = new Bundle();
 
@@ -1186,30 +1197,40 @@ public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupp
         if (pathPdf != null) {
             args.putString(PARAM_PATH_PDF, pathPdf);
         }
+
+        if (passwordPdf != null) {
+			args.putString(PARAM_PASSWORD_PDF, passwordPdf);
+		}
+
         args.putBoolean(PARAM_SHOW_CONTROLS, showControls);
         f.setArguments(args);
         return f;
     }
 
 	public static MuPDFFragment newInstance (byte[] bufferedPdf) {
-		MuPDFFragment f = newInstance(null, null, null, false);
+		MuPDFFragment f = newInstance(null, null, null, null, false);
 		f.setByteArrayPdf(bufferedPdf);
 		return f;
 	}
 
 	public static MuPDFFragment newInstance (String pathPdf) {
-		MuPDFFragment f = newInstance(null, null, pathPdf, false);
+		MuPDFFragment f = newInstance(null, null, pathPdf, null, false);
+		return f;
+	}
+
+	public static MuPDFFragment newInstance (String pathPdf, String passwordPdf) {
+		MuPDFFragment f = newInstance(null, null, pathPdf, passwordPdf, false);
 		return f;
 	}
 
 	public static MuPDFFragment newInstance (byte[] bufferedPdf, boolean showControls) {
-		MuPDFFragment f = newInstance(null, null, null, showControls);
+		MuPDFFragment f = newInstance(null, null, null, null, showControls);
 		f.setByteArrayPdf(bufferedPdf);
 		return f;
 	}
 
     public static MuPDFFragment newInstance (String pathPdf, boolean showControls) {
-        MuPDFFragment f = newInstance(null, null, pathPdf, showControls);
+        MuPDFFragment f = newInstance(null, null, pathPdf, null, showControls);
         return f;
     }
 
