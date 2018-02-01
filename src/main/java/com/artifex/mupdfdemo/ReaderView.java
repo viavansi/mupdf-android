@@ -982,7 +982,7 @@ public class ReaderView
 
 	public void redrawAll() {
 		redrawPage(currentPage);
-		if (mCurrent-1 > 0) {
+		if (mCurrent-1 >= 0) {
 			PageView prevPage = (PageView) mChildViews.get(mCurrent - 1);
 			redrawPage(prevPage);
 		}
