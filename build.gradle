@@ -1,4 +1,5 @@
 repositories {
+    google()
     mavenCentral()
     jcenter()
     maven { url 'http://repo1.maven.org/maven2' }
@@ -6,11 +7,12 @@ repositories {
 
 buildscript {
     repositories {
+        google()
         mavenCentral()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'com.android.tools.build:gradle:3.2.1'
     }
 }
 
@@ -21,15 +23,14 @@ def muPdfversionCode = 20
 def muPdfversionName = '1.2.22'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 26
 
     lintOptions {
         abortOnError false
     }
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 21
+        targetSdkVersion 26
         versionCode muPdfversionCode
         versionName muPdfversionName
     }
@@ -47,8 +48,8 @@ configurations {
 
 dependencies {
     deployerJars 'org.apache.maven.wagon:wagon-http:2.2'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:26.1.0'
 }
 
 // For Maven Repository submitting : Execute task: UploadArchives. Ex: > gradle uploadArchives
