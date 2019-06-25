@@ -12,7 +12,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.4.1'
     }
 }
 
@@ -20,17 +20,17 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
 def muPdfversionCode = 21
-def muPdfversionName = '1.2.23'
+def muPdfversionName = '1.2.24'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
 
     lintOptions {
         abortOnError false
     }
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode muPdfversionCode
         versionName muPdfversionName
     }
@@ -49,7 +49,7 @@ configurations {
 dependencies {
     deployerJars 'org.apache.maven.wagon:wagon-http:2.2'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
 }
 
 // For Maven Repository submitting : Execute task: UploadArchives. Ex: > gradle uploadArchives
