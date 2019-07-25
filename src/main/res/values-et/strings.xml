@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="accept">Nõustu</string>
-	<string name="app_name">MuPDF</string>
+	<string name="mupdf_title">MuPDF</string>
 	<string name="cancel">Tühista</string>
 	<string name="cannot_open_buffer">Ei saa avada puhvrit</string>
 	<string name="cannot_open_document">Ei saa avada dokumenti</string>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="accept">स्वीकार करें</string>
-	<string name="app_name">MuPDF</string>
+	<string name="mupdf_title">MuPDF</string>
 	<string name="cancel">रद्द करें</string>
 	<string name="cannot_open_buffer">बफ़र खोल नहीं सके</string>
 	<string name="cannot_open_document">दस्तावेज़ खोल नहीं सके</string>

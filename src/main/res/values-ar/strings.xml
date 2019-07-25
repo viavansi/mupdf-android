@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="accept">قبول</string>
-	<string name="app_name">MuPDF</string>
+	<string name="mupdf_title">MuPDF</string>
 	<string name="cancel">إلغاء</string>
 	<string name="cannot_open_buffer">تعذر فتح المخزن المؤقت</string>
 	<string name="cannot_open_document">تعذر فتح المستند</string>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="accept">Hyväksy</string>
-	<string name="app_name">MuPDF</string>
+	<string name="mupdf_title">MuPDF</string>
 	<string name="cancel">Peruuta</string>
 	<string name="cannot_open_buffer">Puskuria ei voi avata</string>
 	<string name="cannot_open_document">Tiedostoa ei voi avata</string>

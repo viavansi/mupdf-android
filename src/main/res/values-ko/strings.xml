@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="accept">수락</string>
-	<string name="app_name">MuPDF</string>
+	<string name="mupdf_title">MuPDF</string>
 	<string name="cancel">취소</string>
 	<string name="cannot_open_buffer">버퍼 열 수 없음</string>
 	<string name="cannot_open_document">문서 열 수 없음</string>
