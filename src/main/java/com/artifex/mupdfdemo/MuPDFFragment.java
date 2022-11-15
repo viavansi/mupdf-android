@@ -1,11 +1,9 @@
 package com.artifex.mupdfdemo;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.artifex.utils.DigitalizedEventCallback;
 import com.artifex.utils.PdfBitmap;
@@ -25,7 +23,6 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
@@ -45,7 +42,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ViewAnimator;
 
-import javax.crypto.Cipher;
+import androidx.fragment.app.Fragment;
 
 public class MuPDFFragment extends Fragment implements FilePicker.FilePickerSupport
 {
