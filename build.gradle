@@ -17,7 +17,7 @@ buildscript {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 def muPdfversionCode = 22
 def muPdfversionName = '1.2.24.1'
@@ -54,14 +54,14 @@ dependencies {
 
 // For Maven Repository submitting : Execute task: UploadArchives. Ex: > gradle uploadArchives
 // Define repoUsername, repoPassword and repoUrl on "gradle.properties" file in order to use this task.
-uploadArchives {
-    repositories.mavenDeployer {
-        configuration = configurations.deployerJars
-        repository(url: repoUrl) {
-            authentication(userName: repoUsername, password: repoPassword)
-        }
-        pom.version = muPdfversionName
-        pom.artifactId = "mupdf-android"
-        pom.groupId = "com.viafirma"
-    }
-}
+//uploadArchives {
+//    repositories.mavenDeployer {
+//        configuration = configurations.deployerJars
+//        repository(url: repoUrl) {
+//            authentication(userName: repoUsername, password: repoPassword)
+//        }
+//        pom.version = muPdfversionName
+//        pom.artifactId = "mupdf-android"
+//        pom.groupId = "com.viafirma"
+//    }
+//}
